@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    volumes:
+      - ./dss:/app/dss
+    command: bash -c 'while !</dev/tcp/dss-db/5432; do sleep 1; done; uvicorn dss:app --host 0.0.0.0 --reload'
+    ports:
+      - 8000:8000
+    environment:
+      - DATABASE_URL=postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}:5432/${DATABASE_NAME}
+    depends_on:
+      - dss-db
+    stdin_open: true
+    tty: true
+    env_file:
+      - .env
+  dss-db:
+    restart: always
+    image: postgres:15.1
+    ports:
+      - 5432:5432
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=${DATABASE_NAME}
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_HOST=${DATABASE_HOST}
