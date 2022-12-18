@@ -2,7 +2,7 @@
 name = "dss"
 version = "0.1.0"
 description = ""
-authors = ["Pompeiro <pompeiro10@wp.pl>"]
+authors = ["Pompeiro <maciejgojlikdjango@gmail.com>", "Pompeiro <pompeiro10@wp.pl>"]
 license = "MIT"
 readme = "README.md"
 

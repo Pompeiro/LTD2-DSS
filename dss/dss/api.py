@@ -1,11 +1,11 @@
-from dss.dependencies import get_session
 from fastapi import APIRouter, Depends
 from sqlmodel import Session, select
+
+from dss.dependencies import get_session
+
 from .models import Hero
 
-
 router = APIRouter(prefix="/dss", tags=["dss"])
-
 
 
 @router.post("/heroes")

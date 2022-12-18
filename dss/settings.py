@@ -1,17 +1,18 @@
 from pydantic import BaseSettings
 from sqlalchemy.engine import URL
 
+
 class Settings(BaseSettings):
     allowed_origins: list[str]
     database_name: str
     database_user: str
     database_password: str
     database_host: str
-    database_port: str
+    database_port: int
     database_driver: str
 
     @property
-    def url(self) -> str:
+    def url(self) -> URL:
         return URL.create(
             drivername=self.database_driver,
             username=self.database_user,
@@ -20,5 +21,6 @@ class Settings(BaseSettings):
             host=self.database_host,
             port=self.database_port,
         )
+
 
 settings = Settings()
