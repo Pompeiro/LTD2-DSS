@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     database_host: str
     database_port: int
     database_driver: str
+    ltd2_x_api_key: str
 
     @property
     def url(self) -> URL:

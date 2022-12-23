@@ -3,9 +3,11 @@ from sqlmodel import Session, select
 
 from dss.dependencies import get_session
 
+from .ltd2_units import ltd2_units_router
 from .models import Hero
 
 router = APIRouter(prefix="/dss", tags=["dss"])
+router.include_router(ltd2_units_router)
 
 
 @router.post("/heroes")
