@@ -12,6 +12,7 @@ fastapi = "^0.88.0"
 uvicorn = {extras = ["standard"], version = "^0.20.0"}
 psycopg2-binary = "^2.9.5"
 sqlmodel = "^0.0.8"
+playwright = "^1.28.0"
 
 
 [tool.poetry.group.dev.dependencies]
