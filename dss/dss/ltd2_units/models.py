@@ -4,8 +4,8 @@ from sqlmodel import Field, SQLModel
 
 
 class LTD2Unit(SQLModel, table=True):
-    id: str = Field(default=None, primary_key=True, alias="_id")
-    unit_id: str = Field(alias="unitId")
+    id: str = Field(alias="_id")
+    unit_id: str = Field(default=None, primary_key=True, alias="unitId")
     version: str
     abilities: list[str]
     armor_type: str = Field(alias="armorType")
