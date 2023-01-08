@@ -38,6 +38,35 @@ async def read_arenas(session: Session = Depends(get_session)) -> list[Arena]:
     return arenas
 
 
+@router.put("/{arena_id}")
+async def update_arena(
+    arena_id: int,
+    units: list[str],
+    clear_units: bool = False,
+    session: Session = Depends(get_session),
+) -> Arena:
+    db_arena = session.get(Arena, arena_id)
+    if not db_arena:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=f"Arena with id: {arena_id} not found",
+        )
+    if clear_units is True:
+        db_arena.units_counter.clear()
+        db_arena.units.clear()
+    for unit in units:
+        db_arena.units.append(  # pylint: disable=no-member
+            session.exec(select(Unit).where(Unit.icon_path == unit)).one()
+        )
+    unit_ids = [unit.id for unit in db_arena.units[-(len(units)) :]]
+    db_arena.units_counter = Counter(db_arena.units_counter)
+    db_arena.units_counter.update(unit_ids)
+    session.add(db_arena)
+    session.commit()
+    session.refresh(db_arena)
+    return db_arena
+
+
 @router.get("/{arena_id}")
 async def read_arena(arena_id: int, session: Session = Depends(get_session)) -> Arena:
     arena = session.get(Arena, arena_id)

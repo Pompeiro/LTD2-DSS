@@ -11,7 +11,7 @@ lint:
 	$(DOCKER_COMPOSE) run --rm backend /bin/sh -c "\
 		isort $(SOURCE_DIR) \
 		&& black $(SOURCE_DIR) \
-		&& mypy $(SOURCE_DIR) \
+		&& mypy --install-types --non-interactive $(SOURCE_DIR) \
 		&& pylint -j 4 $(SOURCE_DIR)"
 
 test:

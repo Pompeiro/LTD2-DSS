@@ -5,6 +5,8 @@ services:
     build: .
     volumes:
       - ./dss:/app/dss
+      - /tmp/.X11-unix:/tmp/.X11-unix:ro
+      - ${LTD2_ICONS_PATH}:${LTD2_ICONS_PATH}
     command: bash -c 'while !</dev/tcp/dss-db/5432; do sleep 1; done; uvicorn dss:app --host 0.0.0.0 --reload'
     ports:
       - 8000:8000
