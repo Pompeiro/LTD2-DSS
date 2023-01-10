@@ -13,6 +13,10 @@ uvicorn = {extras = ["standard"], version = "^0.20.0"}
 psycopg2-binary = "^2.9.5"
 sqlmodel = "^0.0.8"
 playwright = "^1.28.0"
+pyautogui = "^0.9.53"
+python-xlib = "^0.33"
+pillow = "^9.4.0"
+opencv-python = "4.5.5.62"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -34,7 +38,8 @@ disable = [
     "too-few-public-methods"
 ]
 extension-pkg-whitelist = ["pydantic"]
-good-names="db"
+good-names=["db", "w", "h", "pt"]
+ignored-modules = ["cv2"]
 
 [tool.isort]
 profile = "black"

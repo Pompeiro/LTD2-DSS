@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     database_port: int
     database_driver: str
     ltd2_x_api_key: str
+    ltd2_icons_path: str
 
     @property
     def url(self) -> URL:
