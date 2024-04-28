@@ -1,3 +1,41 @@
+# LTD2-DSS
+copy env file
+```bash
+cp .env.template .env
+```
+
+Fill env variable with your API key from https://developer.legiontd2.com/home - key_management
+```
+LTD2_X_API_KEY=xxx
+```
+Fill env variable with your path to game icons, use following example:
+```
+LTD2_ICONS_PATH="/home/maciej/.steam/debian-installation/steamapps/common/Legion TD 2/Legion TD 2_Data/uiresources/AeonGT/hud/img/icons/"
+```
+
+feed environment variables from .env
+```bash
+source .env
+```
+change owner of files
+```bash
+sudo chown -R $(whoami) .
+```
+
+open psql where a84 is postgres container id
+```bash
+docker exec -it a84 psql -U postgres -d app
+```
+clear docker
+```bash
+docker system prune -a --volumes
+```
+
+run project
+```bash
+docker compose up -d
+```
+
 # Full Stack FastAPI Template
 
 <a href="https://github.com/tiangolo/full-stack-fastapi-template/actions?query=workflow%3ATest" target="_blank"><img src="https://github.com/tiangolo/full-stack-fastapi-template/workflows/Test/badge.svg" alt="Test"></a>
