@@ -4,9 +4,11 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
+from playwright.async_api import APIRequestContext
 from pydantic import ValidationError
 from sqlmodel import Session
 
+from app.clients.ltd2 import get_api_request_context
 from app.core import security
 from app.core.config import settings
 from app.core.db import engine
@@ -23,6 +25,7 @@ def get_db() -> Generator[Session, None, None]:
 
 
 SessionDep = Annotated[Session, Depends(get_db)]
+APIRequestContextDep = Annotated[APIRequestContext, Depends(get_api_request_context)]
 TokenDep = Annotated[str, Depends(reusable_oauth2)]
 
 
@@ -51,6 +54,6 @@ CurrentUser = Annotated[User, Depends(get_current_user)]
 def get_current_active_superuser(current_user: CurrentUser) -> User:
     if not current_user.is_superuser:
         raise HTTPException(
-            status_code=400, detail="The user doesn't have enough privileges"
+            status_code=403, detail="The user doesn't have enough privileges"
         )
     return current_user
