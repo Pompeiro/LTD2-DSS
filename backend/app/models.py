@@ -1,5 +1,9 @@
-from pydantic import field_validator
+from typing import Optional
+
+from pydantic import computed_field, field_validator
 from sqlmodel import JSON, Column, Field, Relationship, SQLModel
+
+from .enums import ArmorTypes, AttackTypes, damage_def_map
 
 
 # Shared properties
@@ -241,3 +245,105 @@ class LTD2Unit(SQLModel, table=True):
 
     class Config:
         arbitrary_types_allowed = True
+
+
+class Unit(SQLModel, table=True):
+    id: str = Field(default=None, primary_key=True, alias="unit_id")
+    name: str
+    # def
+    hp: int
+    armor_type: ArmorTypes | None = None
+    mp: int | None = None
+    move_speed: int | None = None
+    move_type: str | None = None
+    # dmg
+    attack_range: int | None = None
+    attack_speed: float | None = None
+    attack_type: AttackTypes | None = None
+    dmg_base: int | None = None
+    dps: float | None = None
+    # info
+    gold_cost: int | None = None
+    total_value: int | None = None
+    flags: str
+    info_tier: str | None = None
+    is_enabled: bool
+    legion_id: str
+    unit_class: str
+    icon_path: str
+    splash_path: str
+    version: str
+    arena_id: int | None = Field(default=None, foreign_key="arena.id")
+    arena: Optional["Arena"] = Relationship(back_populates="units")
+
+    @computed_field
+    def hp_vs_impact(self) -> float:
+        return self.hp / damage_def_map.get(AttackTypes.IMPACT).get(self.armor_type)
+
+    @computed_field
+    def hp_vs_pierce(self) -> float:
+        return self.hp / damage_def_map.get(AttackTypes.PIERCE).get(self.armor_type)
+
+    @computed_field
+    def hp_vs_magic(self) -> float:
+        return self.hp / damage_def_map.get(AttackTypes.MAGIC).get(self.armor_type)
+
+    @computed_field
+    def hp_vs_pure(self) -> float:
+        return self.hp / damage_def_map.get(AttackTypes.PURE).get(self.armor_type)
+
+    @computed_field
+    def dmg_vs_swift(self) -> float:
+        return self.dmg_base * damage_def_map.get(self.attack_type).get(
+            ArmorTypes.SWIFT
+        )
+
+    @computed_field
+    def dmg_vs_natural(self) -> float:
+        return self.dmg_base * damage_def_map.get(self.attack_type).get(
+            ArmorTypes.NATURAL
+        )
+
+    @computed_field
+    def dmg_vs_fortified(self) -> float:
+        return self.dmg_base * damage_def_map.get(self.attack_type).get(
+            ArmorTypes.FORTIFIED
+        )
+
+    @computed_field
+    def dmg_vs_arcane(self) -> float:
+        return self.dmg_base * damage_def_map.get(self.attack_type).get(
+            ArmorTypes.ARCANE
+        )
+
+    @computed_field
+    def dmg_vs_immaterial(self) -> float:
+        return self.dmg_base * damage_def_map.get(self.attack_type).get(
+            ArmorTypes.IMMATERIAL
+        )
+
+
+class Arena(SQLModel, table=True):
+    id: int = Field(default=None, primary_key=True, ge=1, le=4)
+    units: list[Unit] = Relationship(back_populates="arena")
+    units_counter: dict[str, int] = Field(default={}, sa_column=Column(JSON))
+
+
+class CreateUpdateArena(SQLModel):
+    id: int = Field(ge=1, le=4)
+    unit_ids: list[str]
+
+
+class Stats(SQLModel):
+    hp: list = []
+    dps: list = []
+    dmg_base: list = []
+    hp_vs_impact: list = []
+    hp_vs_pierce: list = []
+    hp_vs_magic: list = []
+    hp_vs_pure: list = []
+    dmg_vs_swift: list = []
+    dmg_vs_natural: list = []
+    dmg_vs_fortified: list = []
+    dmg_vs_arcane: list = []
+    dmg_vs_immaterial: list = []
