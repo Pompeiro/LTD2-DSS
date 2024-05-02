@@ -1,4 +1,3 @@
-from collections.abc import Sequence
 from http import HTTPStatus
 
 from fastapi import APIRouter, HTTPException, Query
@@ -31,7 +30,7 @@ async def clone_units_from_database(
 @router.get("/")
 async def read_units(
     session: SessionDep, offset: int = 0, limit: int = Query(default=10, le=500)
-) -> Sequence[Unit]:
+) -> list[Unit]:
     units = session.exec(select(Unit).offset(offset).limit(limit)).all()
     return units
 

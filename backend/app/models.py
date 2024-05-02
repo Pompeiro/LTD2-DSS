@@ -250,6 +250,7 @@ class LTD2Unit(SQLModel, table=True):
 class Unit(SQLModel, table=True):
     id: str = Field(default=None, primary_key=True, alias="unit_id")
     name: str
+    sort_order: str
     # def
     hp: int
     armor_type: ArmorTypes | None = None
@@ -278,46 +279,64 @@ class Unit(SQLModel, table=True):
 
     @computed_field
     def hp_vs_impact(self) -> float:
+        if [x for x in (self.hp, self.armor_type) if x is None]:
+            return 0
         return self.hp / damage_def_map.get(AttackTypes.IMPACT).get(self.armor_type)
 
     @computed_field
     def hp_vs_pierce(self) -> float:
+        if [x for x in (self.hp, self.armor_type) if x is None]:
+            return 0
         return self.hp / damage_def_map.get(AttackTypes.PIERCE).get(self.armor_type)
 
     @computed_field
     def hp_vs_magic(self) -> float:
+        if [x for x in (self.hp, self.armor_type) if x is None]:
+            return 0
         return self.hp / damage_def_map.get(AttackTypes.MAGIC).get(self.armor_type)
 
     @computed_field
     def hp_vs_pure(self) -> float:
+        if [x for x in (self.hp, self.armor_type) if x is None]:
+            return 0
         return self.hp / damage_def_map.get(AttackTypes.PURE).get(self.armor_type)
 
     @computed_field
     def dmg_vs_swift(self) -> float:
+        if [x for x in (self.dmg_base, self.attack_type) if x is None]:
+            return 0
         return self.dmg_base * damage_def_map.get(self.attack_type).get(
             ArmorTypes.SWIFT
         )
 
     @computed_field
     def dmg_vs_natural(self) -> float:
+        if [x for x in (self.dmg_base, self.attack_type) if x is None]:
+            return 0
         return self.dmg_base * damage_def_map.get(self.attack_type).get(
             ArmorTypes.NATURAL
         )
 
     @computed_field
     def dmg_vs_fortified(self) -> float:
+        if [x for x in (self.dmg_base, self.attack_type) if x is None]:
+            return 0
         return self.dmg_base * damage_def_map.get(self.attack_type).get(
             ArmorTypes.FORTIFIED
         )
 
     @computed_field
     def dmg_vs_arcane(self) -> float:
+        if [x for x in (self.dmg_base, self.attack_type) if x is None]:
+            return 0
         return self.dmg_base * damage_def_map.get(self.attack_type).get(
             ArmorTypes.ARCANE
         )
 
     @computed_field
     def dmg_vs_immaterial(self) -> float:
+        if [x for x in (self.dmg_base, self.attack_type) if x is None]:
+            return 0
         return self.dmg_base * damage_def_map.get(self.attack_type).get(
             ArmorTypes.IMMATERIAL
         )
