@@ -38,6 +38,9 @@ services:
   backend:
     image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
     restart: always
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:ro
+      - ${LTD2_ICONS_PATH}:${LTD2_ICONS_PATH}
     networks:
       - traefik-public
       - default

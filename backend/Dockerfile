@@ -1,5 +1,13 @@
 FROM tiangolo/uvicorn-gunicorn-fastapi:python3.11
 
+RUN apt-get update && apt-get install -y \
+    curl \
+    gcc
+
+RUN apt-get install scrot -y
+RUN apt-get install ffmpeg libsm6 libxext6  -y
+RUN apt-get install gnome-screenshot -y
+
 WORKDIR /app/
 
 # Install Poetry

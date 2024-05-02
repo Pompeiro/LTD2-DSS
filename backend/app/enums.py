@@ -1,4 +1,4 @@
-from enum import StrEnum
+from enum import IntEnum, StrEnum
 
 
 class AttackTypes(StrEnum):
@@ -14,6 +14,14 @@ class ArmorTypes(StrEnum):
     FORTIFIED = ("Fortified",)
     ARCANE = ("Arcane",)
     IMMATERIAL = "Immaterial"
+
+
+class ArenaGrid(IntEnum):
+    X1 = (550,)
+    X2 = (775,)
+    Y1 = (380,)
+    Y2 = (715,)
+    MARGIN = 10
 
 
 IMPACT_VS_SWIFT = 0.8
