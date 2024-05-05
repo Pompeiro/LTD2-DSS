@@ -1,6 +1,9 @@
-from fastapi import APIRouter
+from typing import Annotated
+
+from fastapi import APIRouter, Path
 
 from app.api.deps import SessionDep
+from app.core.config import settings
 from app.enums import creatures_amount_map
 from app.models import CreatureSummedStats, Stats, SummedStats, Unit
 
@@ -19,7 +22,7 @@ async def read_creatures(session: SessionDep) -> list[Unit]:
 
 
 @router.get("/creatures/{stage}")
-async def read_creatures_by_stage(stage: int, session: SessionDep) -> list[Unit]:
+async def read_creatures_by_stage(stage: Annotated[int, Path(ge=1, le=settings.STAGES_LIMIT)], session: SessionDep) -> list[Unit]:
     stage = str(stage).zfill(2)
     creatures = (
         session.query(Unit)
@@ -31,7 +34,9 @@ async def read_creatures_by_stage(stage: int, session: SessionDep) -> list[Unit]
 
 
 @router.get("/creatures/{stage}/stats")
-async def calculate_stage_stats(stage: int, session: SessionDep) -> CreatureSummedStats:
+async def calculate_stage_stats(
+    stage: Annotated[int, Path(ge=1, le=settings.STAGES_LIMIT)], session: SessionDep
+) -> CreatureSummedStats:
     stage = str(stage).zfill(2)
     creatures: list[Unit] = (
         session.query(Unit)
