@@ -105,3 +105,18 @@ creatures_amount_map = {
     "Legion Lord": 10,
     "Legion King": 1,
 }
+
+stage_attack_to_arena_hp_vs_map: dict[AttackTypes, str] = {
+    AttackTypes.IMPACT: "hp_vs_impact",
+    AttackTypes.PIERCE: "hp_vs_pierce",
+    AttackTypes.MAGIC: "hp_vs_magic",
+    AttackTypes.PURE: "hp_vs_pure",
+}
+
+stage_armor_to_arena_dps_vs_map: dict[ArmorTypes, str] = {
+    ArmorTypes.SWIFT: "dps_vs_swift",
+    ArmorTypes.NATURAL: "dps_vs_natural",
+    ArmorTypes.FORTIFIED: "dps_vs_fortified",
+    ArmorTypes.ARCANE: "dps_vs_arcane",
+    ArmorTypes.IMMATERIAL: "dps_vs_immaterial",
+}

@@ -1,8 +1,11 @@
-from fastapi import APIRouter
+from typing import Annotated
+
+from fastapi import APIRouter, Path
 
 from app.api.deps import SessionDep
+from app.core.config import settings
 from app.enums import creatures_amount_map
-from app.models import Stats, Unit
+from app.models import CreatureSummedStats, Stats, SummedStats, Unit
 
 router = APIRouter()
 
@@ -19,7 +22,7 @@ async def read_creatures(session: SessionDep) -> list[Unit]:
 
 
 @router.get("/creatures/{stage}")
-async def read_creatures_by_stage(stage: int, session: SessionDep) -> list[Unit]:
+async def read_creatures_by_stage(stage: Annotated[int, Path(ge=1, le=settings.STAGES_LIMIT)], session: SessionDep) -> list[Unit]:
     stage = str(stage).zfill(2)
     creatures = (
         session.query(Unit)
@@ -30,10 +33,12 @@ async def read_creatures_by_stage(stage: int, session: SessionDep) -> list[Unit]
     return creatures
 
 
-@router.get("/creatures/{stage}/calculate-wave")
-async def calculate_wave_stats(stage: int, session: SessionDep) -> Stats:
+@router.get("/creatures/{stage}/stats")
+async def calculate_stage_stats(
+    stage: Annotated[int, Path(ge=1, le=settings.STAGES_LIMIT)], session: SessionDep
+) -> CreatureSummedStats:
     stage = str(stage).zfill(2)
-    creatures = (
+    creatures: list[Unit] = (
         session.query(Unit)
         .filter(Unit.unit_class == "Creature")
         .filter(Unit.sort_order.startswith(f"creature_legion_id.{stage}"))
@@ -48,4 +53,10 @@ async def calculate_wave_stats(stage: int, session: SessionDep) -> Stats:
                 getattr(creature, stats_item) * creatures_amount_map.get(creature.name)
             )
         setattr(stats, stats_item, sum(units_stat))
-    return stats
+    summed_stats = SummedStats(**stats.model_dump())
+    creature_stats = CreatureSummedStats(
+        **summed_stats.model_dump(),
+        attack_type=creatures[0].attack_type,
+        armor_type=creatures[0].armor_type,
+    )
+    return creature_stats

@@ -302,42 +302,34 @@ class Unit(SQLModel, table=True):
         return self.hp / damage_def_map.get(AttackTypes.PURE).get(self.armor_type)
 
     @computed_field
-    def dmg_vs_swift(self) -> float:
-        if [x for x in (self.dmg_base, self.attack_type) if x is None]:
+    def dps_vs_swift(self) -> float:
+        if [x for x in (self.dps, self.attack_type) if x is None]:
             return 0
-        return self.dmg_base * damage_def_map.get(self.attack_type).get(
-            ArmorTypes.SWIFT
-        )
+        return self.dps * damage_def_map.get(self.attack_type).get(ArmorTypes.SWIFT)
 
     @computed_field
-    def dmg_vs_natural(self) -> float:
-        if [x for x in (self.dmg_base, self.attack_type) if x is None]:
+    def dps_vs_natural(self) -> float:
+        if [x for x in (self.dps, self.attack_type) if x is None]:
             return 0
-        return self.dmg_base * damage_def_map.get(self.attack_type).get(
-            ArmorTypes.NATURAL
-        )
+        return self.dps * damage_def_map.get(self.attack_type).get(ArmorTypes.NATURAL)
 
     @computed_field
-    def dmg_vs_fortified(self) -> float:
-        if [x for x in (self.dmg_base, self.attack_type) if x is None]:
+    def dps_vs_fortified(self) -> float:
+        if [x for x in (self.dps, self.attack_type) if x is None]:
             return 0
-        return self.dmg_base * damage_def_map.get(self.attack_type).get(
-            ArmorTypes.FORTIFIED
-        )
+        return self.dps * damage_def_map.get(self.attack_type).get(ArmorTypes.FORTIFIED)
 
     @computed_field
-    def dmg_vs_arcane(self) -> float:
-        if [x for x in (self.dmg_base, self.attack_type) if x is None]:
+    def dps_vs_arcane(self) -> float:
+        if [x for x in (self.dps, self.attack_type) if x is None]:
             return 0
-        return self.dmg_base * damage_def_map.get(self.attack_type).get(
-            ArmorTypes.ARCANE
-        )
+        return self.dps * damage_def_map.get(self.attack_type).get(ArmorTypes.ARCANE)
 
     @computed_field
-    def dmg_vs_immaterial(self) -> float:
-        if [x for x in (self.dmg_base, self.attack_type) if x is None]:
+    def dps_vs_immaterial(self) -> float:
+        if [x for x in (self.dps, self.attack_type) if x is None]:
             return 0
-        return self.dmg_base * damage_def_map.get(self.attack_type).get(
+        return self.dps * damage_def_map.get(self.attack_type).get(
             ArmorTypes.IMMATERIAL
         )
 
@@ -361,8 +353,61 @@ class Stats(SQLModel):
     hp_vs_pierce: list[float] = []
     hp_vs_magic: list[float] = []
     hp_vs_pure: list[float] = []
-    dmg_vs_swift: list[float] = []
-    dmg_vs_natural: list[float] = []
-    dmg_vs_fortified: list[float] = []
-    dmg_vs_arcane: list[float] = []
-    dmg_vs_immaterial: list[float] = []
+    dps_vs_swift: list[float] = []
+    dps_vs_natural: list[float] = []
+    dps_vs_fortified: list[float] = []
+    dps_vs_arcane: list[float] = []
+    dps_vs_immaterial: list[float] = []
+
+
+class SummedStats(SQLModel):
+    hp: int
+    dps: float
+    dmg_base: int
+    hp_vs_impact: float
+    hp_vs_pierce: float
+    hp_vs_magic: float
+    hp_vs_pure: float
+    dps_vs_swift: float
+    dps_vs_natural: float
+    dps_vs_fortified: float
+    dps_vs_arcane: float
+    dps_vs_immaterial: float
+
+
+class CreatureSummedStats(SummedStats):
+    attack_type: AttackTypes
+    armor_type: ArmorTypes
+
+
+class ArenaStatsVsStage(SQLModel):
+    # arena seconds to kill formula self.stage_hp / self.arena_vs_stage_dps_diff as damage modifier is applied
+    # on the dps and it can be compared then with raw hp
+
+    # diff can be compared raw to multiplier as multiplied stats are used in this model
+    arena_hp_vs_stage_attack_type: float
+    arena_dps_vs_stage_armor_type: float
+    stage_attack_type: AttackTypes
+    stage_armor_type: ArmorTypes
+    stage_hp: float
+    stage_dps: float
+
+    @computed_field
+    def arena_seconds_to_kill_stage(self) -> float:
+        return self.stage_hp / self.arena_dps_vs_stage_armor_type
+
+    @computed_field
+    def stage_seconds_to_kill_arena(self) -> float:
+        return self.arena_hp_vs_stage_attack_type / self.stage_dps
+
+    @computed_field
+    def arena_vs_stage_seconds_to_kill_diff(self) -> float:
+        return self.arena_seconds_to_kill_stage - self.stage_seconds_to_kill_arena
+
+    @computed_field
+    def arena_vs_stage_hp_diff(self) -> float:
+        return self.arena_hp_vs_stage_attack_type - self.stage_hp
+
+    @computed_field
+    def arena_vs_stage_dps_diff(self) -> float:
+        return self.arena_dps_vs_stage_armor_type - self.stage_dps
