@@ -22,6 +22,16 @@ class ArenaGrid(IntEnum):
     Y1 = (380,)
     Y2 = (715,)
     MARGIN = 10
+    object_to_compare_size = 25
+
+
+class ShopGrid(IntEnum):
+    X1 = (595,)
+    X2 = (1015,)
+    Y1 = (995,)
+    Y2 = (1060,)
+    MARGIN = 10
+    object_to_compare_size = 64
 
 
 IMPACT_VS_SWIFT = 0.8

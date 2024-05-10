@@ -22,7 +22,9 @@ async def read_creatures(session: SessionDep) -> list[Unit]:
 
 
 @router.get("/creatures/{stage}")
-async def read_creatures_by_stage(stage: Annotated[int, Path(ge=1, le=settings.STAGES_LIMIT)], session: SessionDep) -> list[Unit]:
+async def read_creatures_by_stage(
+    stage: Annotated[int, Path(ge=1, le=settings.STAGES_LIMIT)], session: SessionDep
+) -> list[Unit]:
     stage = str(stage).zfill(2)
     creatures = (
         session.query(Unit)
