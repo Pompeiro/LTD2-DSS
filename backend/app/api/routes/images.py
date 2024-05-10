@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse
 
 from app.api.deps import SessionDep
 from app.core.config import settings
-from app.enums import ArenaGrid
+from app.enums import ArenaGrid, ShopGrid
 from app.models import Unit
 
 IMAGES_DIR = "app/images"
@@ -27,6 +27,13 @@ async def make_ss() -> Response:
         (ArenaGrid.X1, ArenaGrid.Y1),
         (ArenaGrid.X2, ArenaGrid.Y2),
         (0, 255, 0),
+        3,
+    )
+    cv.rectangle(
+        cv_screenshot,
+        (ShopGrid.X1, ShopGrid.Y1),
+        (ShopGrid.X2, ShopGrid.Y2),
+        (0, 125, 50),
         3,
     )
     cv.imwrite(f"{IMAGES_DIR}/cv_screenshot.png", cv_screenshot)
@@ -69,6 +76,51 @@ async def match_template(return_image: bool) -> Response | list[str]:
         cv.imwrite(f"{IMAGES_DIR}/res.png", img_rgb)
     if return_image is True:
         return FileResponse(f"{IMAGES_DIR}/res.png")
+    return matched_units
+
+
+@router.get("/match-template-shop", response_model=None)
+async def match_template_shop(
+    return_image: bool,
+    image_path: str = f"{IMAGES_DIR}/my_screenshot.png",
+    grid: ArenaGrid | ShopGrid = ShopGrid,
+    image_result_path: str = f"{IMAGES_DIR}/res1.png",
+) -> Response | list[str]:
+    img_rgb = cv.imread(image_path)
+    img_rgb = img_rgb[
+        grid.Y1 - grid.MARGIN : grid.Y2 + grid.MARGIN,
+        grid.X1 - grid.MARGIN : grid.X2 + grid.MARGIN,
+    ]
+    img_gray = cv.cvtColor(img_rgb, cv.COLOR_BGR2GRAY)
+    icons = pathlib.Path(f"{IMAGES_DIR}/icons")
+    matched_units = []
+    for icon in icons.iterdir():
+        if icon.name == ".gitignore":
+            continue
+        template = cv.imread(str(icon), 0)
+        template = template[16:64, 0:64]
+        # template = cv.resize(template, dsize=(grid.object_to_compare_size, grid.object_to_compare_size))
+        w, h = template.shape[::-1]
+        res = cv.matchTemplate(img_gray, template, cv.TM_CCOEFF_NORMED)
+        threshold = 0.63
+        loc = np.where(res >= threshold)
+        mask = np.zeros(img_rgb.shape[:2], np.uint8)
+        for pt in zip(*loc[::-1], strict=False):
+            if mask[pt[1] + int(round(h / 2)), pt[0] + int(round(w / 2))] != 255:
+                mask[pt[1] : pt[1] + h, pt[0] : pt[0] + w] = 255
+                cv.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), (0, 255, 0), 1)
+                cv.putText(
+                    img_rgb,
+                    icon.name.split(".")[0],
+                    (pt[0] + w, pt[1] + h),
+                    cv.FONT_HERSHEY_SIMPLEX,
+                    0.5,
+                    (122, 255, 55),
+                )
+                matched_units.append(f"Icons/{icon.name}")
+        cv.imwrite(image_result_path, img_rgb)
+    if return_image is True:
+        return FileResponse(image_result_path)
     return matched_units
 
 
