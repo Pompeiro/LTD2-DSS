@@ -14,7 +14,7 @@ from app.models import Unit
 
 IMAGES_DIR = "app/images"
 
-router = APIRouter()
+router = APIRouter(prefix="/images", tags=["images"])
 
 
 @router.get("/")

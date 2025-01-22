@@ -11,7 +11,7 @@ from app.clients.ltd2 import (
 )
 from app.models import LTD2Unit
 
-router = APIRouter()
+router = APIRouter(prefix="/ltd2-units", tags=["ltd2-units"])
 
 
 @router.post("/", status_code=HTTPStatus.CREATED)

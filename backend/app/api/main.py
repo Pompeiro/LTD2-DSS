@@ -1,15 +1,31 @@
 from fastapi import APIRouter
 
-from app.api.routes import arenas, creatures, images, ltd2_units, stats, units
+from app.api.routes import (
+    arenas,
+    creatures,
+    images,
+    items,
+    login,
+    ltd2_units,
+    private,
+    stats,
+    units,
+    users,
+    utils,
+)
+from app.core.config import settings
 
 api_router = APIRouter()
-# api_router.include_router(login.router, tags=["login"])
-# api_router.include_router(users.router, prefix="/users", tags=["users"])
-# api_router.include_router(utils.router, prefix="/utils", tags=["utils"])
-# api_router.include_router(items.router, prefix="/items", tags=["items"])
-api_router.include_router(ltd2_units.router, prefix="/ltd2-units", tags=["ltd2-units"])
-api_router.include_router(units.router, prefix="/units", tags=["units"])
-arenas.router.include_router(stats.router, prefix="/{arena_id}/stats", tags=["stats"])
-api_router.include_router(arenas.router, prefix="/arenas", tags=["arenas"])
-api_router.include_router(images.router, prefix="/images", tags=["images"])
-api_router.include_router(creatures.router, prefix="/creatures", tags=["creatures"])
+api_router.include_router(login.router)
+api_router.include_router(users.router)
+api_router.include_router(utils.router)
+api_router.include_router(items.router)
+api_router.include_router(ltd2_units.router)
+api_router.include_router(units.router)
+arenas.router.include_router(stats.router)
+api_router.include_router(arenas.router)
+api_router.include_router(images.router)
+api_router.include_router(creatures.router)
+
+if settings.ENVIRONMENT == "local":
+    api_router.include_router(private.router)

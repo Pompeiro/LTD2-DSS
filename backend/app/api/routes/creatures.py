@@ -7,10 +7,10 @@ from app.core.config import settings
 from app.enums import creatures_amount_map
 from app.models import CreatureSummedStats, Stats, SummedStats, Unit
 
-router = APIRouter()
+router = APIRouter(prefix="/creatures", tags=["creatures"])
 
 
-@router.get("/creatures")
+@router.get("/")
 async def read_creatures(session: SessionDep) -> list[Unit]:
     creatures = (
         session.query(Unit)
@@ -21,7 +21,7 @@ async def read_creatures(session: SessionDep) -> list[Unit]:
     return creatures
 
 
-@router.get("/creatures/{stage}")
+@router.get("/{stage}")
 async def read_creatures_by_stage(
     stage: Annotated[int, Path(ge=1, le=settings.STAGES_LIMIT)], session: SessionDep
 ) -> list[Unit]:
@@ -35,7 +35,7 @@ async def read_creatures_by_stage(
     return creatures
 
 
-@router.get("/creatures/{stage}/stats")
+@router.get("/{stage}/stats")
 async def calculate_stage_stats(
     stage: Annotated[int, Path(ge=1, le=settings.STAGES_LIMIT)], session: SessionDep
 ) -> CreatureSummedStats:
