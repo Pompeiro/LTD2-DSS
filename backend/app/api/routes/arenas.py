@@ -7,7 +7,7 @@ from sqlmodel import select
 from app.api.deps import SessionDep
 from app.models import Arena, CreateUpdateArena, Unit
 
-router = APIRouter()
+router = APIRouter(prefix="/arenas", tags=["arenas"])
 
 
 @router.post("/", status_code=HTTPStatus.CREATED)

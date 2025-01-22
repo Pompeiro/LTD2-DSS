@@ -7,7 +7,7 @@ from sqlmodel import select
 from app.api.deps import SessionDep
 from app.models import LTD2Unit, Unit
 
-router = APIRouter()
+router = APIRouter(prefix="/units", tags=["units"])
 
 
 @router.post("/", status_code=HTTPStatus.CREATED)

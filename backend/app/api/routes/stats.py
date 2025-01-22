@@ -9,7 +9,7 @@ from app.core.config import settings
 from app.enums import stage_armor_to_arena_dps_vs_map, stage_attack_to_arena_hp_vs_map
 from app.models import Arena, ArenaStatsVsStage, CreatureSummedStats, Stats, SummedStats
 
-router = APIRouter()
+router = APIRouter(prefix="/{arena_id}/stats", tags=["stats"])
 
 
 @router.get("/")
