@@ -79,6 +79,7 @@ services:
     image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
     restart: always
     volumes:
+      - ./backend/app/images:/app/app/images
       - /tmp/.X11-unix:/tmp/.X11-unix:ro
       - ~/.Xauthority:/root/.Xauthority
       - ${LTD2_ICONS_PATH}:${LTD2_ICONS_PATH}
