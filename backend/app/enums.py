@@ -17,10 +17,14 @@ class ArmorTypes(StrEnum):
 
 
 class ArenaGrid(IntEnum):
-    X1 = (550,)
-    X2 = (775,)
-    Y1 = (380,)
-    Y2 = (715,)
+    # X1 = (550,)
+    # X2 = (775,)
+    # Y1 = (380,)
+    # Y2 = (715,)
+    X1 = (683,)
+    X2 = (683 + 216,)
+    Y1 = (410,)
+    Y2 = (410 + 337,)
     MARGIN = 10
     object_to_compare_size = 25
 

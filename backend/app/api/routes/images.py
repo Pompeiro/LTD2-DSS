@@ -1,25 +1,30 @@
 import pathlib
 import shutil
+from pathlib import Path
+from typing import Annotated
 
 import cv2 as cv
 import numpy as np
 import pyautogui
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Query, Response
 from fastapi.responses import FileResponse
 
 from app.api.deps import SessionDep
 from app.core.config import settings
 from app.enums import ArenaGrid, ShopGrid
 from app.models import Unit
+from app.playground_area_coordinates import grid
+from app.views import sandbox_view
 
 IMAGES_DIR = "app/images"
-
+STATIC_IMAGES_SANDBOX_DIR = Path("app/images/static/sandbox")
 router = APIRouter(prefix="/images", tags=["images"])
 
 
 @router.get("/")
-async def make_ss() -> Response:
-    screenshot = pyautogui.screenshot(region=(0, 0, 1920, 1080))
+async def make_ss(display: Annotated[int, Query(ge=1, le=2)] = 2) -> Response:
+    regions = {1: (0, 0, 1920, 1080), 2: (1920, 0, 1920, 1080)}
+    screenshot = pyautogui.screenshot(region=regions.get(display))
     screenshot.save(f"{IMAGES_DIR}/my_screenshot.png")
     cv_screenshot = cv.cvtColor(np.array(screenshot), cv.COLOR_RGB2BGR)
     cv.rectangle(
@@ -146,3 +151,97 @@ async def copy_icons(session: SessionDep) -> list[str]:
         f"{file_destination}/PriestessOfTheAbyss.png"
     )  # local icon game files are named differently than in LDT2 CDN
     return icons_to_copy
+
+
+@router.get("/add-playground-grid", response_model=None)
+async def add_playground_grid(
+    image_path: str = f"{STATIC_IMAGES_SANDBOX_DIR}/playground_area.png",
+    image_result_path: str = f"{IMAGES_DIR}/res1.png",
+) -> Response | list[str]:
+    img_rgb = cv.imread(image_path)
+    full_square_img = cv.imread(STATIC_IMAGES_SANDBOX_DIR.joinpath("full_square.png"))
+    # mini_square_img = cv.imread(STATIC_IMAGES_SANDBOX_DIR.joinpath("mini_square.png"))
+
+    # Point = namedtuple("Point", ["w", "h"])
+    # tl = Point(w=66,h=6)
+    # bl = Point(w=0,h=578)
+    # br = Point(w=485,h=584)
+    # tr = Point(w=420,h=5)
+
+    start = (65, 4)
+    # end = (484, 584)
+    full_square_height, full_square_width = full_square_img.shape[:2]
+    # mini_square_height, mini_square_width = mini_square_img.shape[:2]
+    area_rows_full = 14
+    area_columns_full = 9
+    # area_rows_mini = 14 * 2
+    # area_columns_mini = 9 * 2
+
+    for j, _row in enumerate(range(area_rows_full)):
+        for i, _column in enumerate(range(area_columns_full)):
+            cv.rectangle(
+                img_rgb,
+                start,
+                (
+                    start[0] + i * full_square_width + full_square_width,
+                    start[1] + j * full_square_height + full_square_height,
+                ),
+                (0, 255, 0),
+                1,
+            )
+    cv.imwrite(image_result_path, img_rgb)
+
+    for j, _row in enumerate(range(area_rows_full)):
+        for i, _column in enumerate(range(area_columns_full)):
+            cv.rectangle(
+                img_rgb,
+                start,
+                (
+                    start[0] + i * full_square_width + full_square_width,
+                    start[1] + j * full_square_height + full_square_height,
+                ),
+                (0, 255, 0),
+                1,
+            )
+    cv.imwrite(image_result_path, img_rgb)
+    return FileResponse(image_result_path)
+
+
+@router.get("/add-playground-grid-with-perspective", response_model=None)
+async def add_playground_grid_with_perspective(
+    image_path: str = f"{STATIC_IMAGES_SANDBOX_DIR}/playground.png",
+    image_result_path: str = f"{IMAGES_DIR}/res1.png",
+) -> Response | list[str]:
+    img_rgb = cv.imread(image_path)
+    for i, row in enumerate(grid):
+        for column in row:
+            cv.rectangle(
+                img=img_rgb,
+                pt1=column.tl,
+                pt2=column.br,
+                color=(0, 255 - i * 30, i * 45),
+                thickness=1,
+            )
+            cv.drawMarker(
+                img=img_rgb,
+                position=column.center,
+                color=(0, 255 - i * 30, i * 45),
+                thickness=1,
+            )
+    cv.imwrite(image_result_path, img_rgb)
+    return FileResponse(image_result_path)
+
+
+@router.get("/add-shop-towers-buttons-markers", response_model=None)
+async def add_shop_towers_buttons_markers(
+    image_path: str = f"{STATIC_IMAGES_SANDBOX_DIR}/playground.png",
+    image_result_path: str = f"{IMAGES_DIR}/res1.png",
+) -> Response | list[str]:
+    img_rgb = cv.imread(image_path)
+    towers = sandbox_view.shop_towers_buttons.towers
+    for tower in towers:
+        cv.drawMarker(
+            img=img_rgb, position=tower.center, color=(0, 255, 0), thickness=4
+        )
+    cv.imwrite(image_result_path, img_rgb)
+    return FileResponse(image_result_path)
