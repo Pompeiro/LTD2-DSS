@@ -1,20 +1,22 @@
+import logging
 from pathlib import Path
-from typing import Annotated
 
-import cv2 as cv
 import pyautogui
-from fastapi import Query
 from pydantic import BaseModel
 
+from app.localstack.images import (
+    make_screenshot_by_given_display,
+    match_template_center,
+)
 from app.playground_area_coordinates import GridRectangle, grid
 
 IMAGES_DIR = "app/images"
 STATIC_IMAGES_DIR = "app/images/static"
-STATIC_IMAGES_MAIN_MENU_DIR = Path("app/images/static/main_menu")
-STATIC_IMAGES_SOLO_DIR = Path("app/images/static/solo")
-STATIC_IMAGES_LEARN_DIR = Path("app/images/static/learn")
-STATIC_IMAGES_CHOOSE_LEGION_DIR = Path("app/images/static/choose_legion")
-STATIC_IMAGES_SANDBOX_DIR = Path("app/images/static/sandbox")
+STATIC_IMAGES_MAIN_MENU_DIR:Path = Path(f"{STATIC_IMAGES_DIR}/main_menu")
+STATIC_IMAGES_SOLO_DIR:Path = Path(f"{STATIC_IMAGES_DIR}/solo")
+STATIC_IMAGES_LEARN_DIR:Path = Path(f"{STATIC_IMAGES_DIR}/learn")
+STATIC_IMAGES_CHOOSE_LEGION_DIR:Path = Path(f"{STATIC_IMAGES_DIR}/choose_legion")
+STATIC_IMAGES_SANDBOX_DIR:Path= Path(f"{STATIC_IMAGES_DIR}/sandbox")
 
 
 class ActionableElement(BaseModel):
@@ -31,7 +33,7 @@ class ActionableElement(BaseModel):
 def expect_to_be_in_view(
     haystack_path: Path, needle: ActionableElement, threshold: int = 5
 ) -> bool:
-    make_ss_sync(save_to=haystack_path)
+    make_screenshot_by_given_display(path=haystack_path)
     center = match_template_center(
         haystack_path=haystack_path, needle_path=needle.image_path
     )
@@ -39,37 +41,10 @@ def expect_to_be_in_view(
     needle_x, needle_y = needle.center
     fit_x = needle_x - threshold <= x < needle_x + threshold
     fit_y = needle_y - threshold <= y < needle_y + threshold
-    return fit_x and fit_y
-
-
-def make_ss_sync(save_to: Path, display: Annotated[int, Query(ge=1, le=2)] = 2):
-    regions = {1: (0, 0, 1920, 1080), 2: (1920, 0, 1920, 1080)}
-    screenshot = pyautogui.screenshot(region=regions.get(display))
-    screenshot.save(save_to)
-
-
-def match_template_center(haystack_path: Path, needle_path: Path) -> tuple[int, int]:
-    haystack_img = cv.imread(haystack_path, cv.IMREAD_UNCHANGED)
-    needle_img = cv.imread(needle_path, cv.IMREAD_UNCHANGED)
-
-    result = cv.matchTemplate(haystack_img, needle_img, cv.TM_CCOEFF_NORMED)
-
-    min_val, max_val, min_loc, max_loc = cv.minMaxLoc(result)
-
-    top_left = max_loc
-
-    needle_h, needle_w = needle_img.shape[:2]
-
-    center_x = top_left[0] + needle_w // 2
-    center_y = top_left[1] + needle_h // 2
-
-    center = (center_x, center_y)
-
-    bottom_right = (top_left[0] + needle_w, top_left[1] + needle_h)
-    cv.rectangle(haystack_img, top_left, bottom_right, (0, 255, 0), 2)
-    cv.circle(haystack_img, center, 5, (0, 0, 255), -1)
-    cv.imwrite(f"{IMAGES_DIR}/res.png", haystack_img)
-    return center
+    result = fit_x and fit_y
+    logging.info("Current needle: %s", needle.image_path.stem)
+    logging.info("Is needle in view?: %s", result)
+    return result
 
 
 class MainMenuNavigationButtons(BaseModel):
