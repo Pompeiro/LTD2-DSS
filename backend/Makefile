@@ -7,6 +7,6 @@ run:
 	docker compose up -d
 
 lint:
-	ruff check app scripts --fix \
-    && ruff format app scripts \
-    && mypy app
+	uv run ruff check app scripts --fix \
+    && uv run ruff format app scripts \
+    && uv run mypy app

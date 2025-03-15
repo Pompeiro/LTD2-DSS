@@ -26,7 +26,6 @@ dependencies = [
     "pyautogui>=0.9.54",
     "python-xlib>=0.33",
     "pillow>=11.1.0",
-    "ipdb>=0.13.13",
     "easyocr>=1.7.2",
 ]
 
@@ -38,6 +37,8 @@ dev-dependencies = [
     "pre-commit<4.0.0,>=3.6.2",
     "types-passlib<2.0.0.0,>=1.7.7.20240106",
     "coverage<8.0.0,>=7.4.3",
+    "ipdb>=0.13.13",
+    "rich>=13.8.1",
 ]
 
 [build-system]
