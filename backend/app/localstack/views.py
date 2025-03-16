@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 
+import cv2 as cv
 import pyautogui
 from pydantic import BaseModel
 
@@ -12,11 +13,12 @@ from app.playground_area_coordinates import GridRectangle, grid
 
 IMAGES_DIR = "app/images"
 STATIC_IMAGES_DIR = "app/images/static"
-STATIC_IMAGES_MAIN_MENU_DIR:Path = Path(f"{STATIC_IMAGES_DIR}/main_menu")
-STATIC_IMAGES_SOLO_DIR:Path = Path(f"{STATIC_IMAGES_DIR}/solo")
-STATIC_IMAGES_LEARN_DIR:Path = Path(f"{STATIC_IMAGES_DIR}/learn")
-STATIC_IMAGES_CHOOSE_LEGION_DIR:Path = Path(f"{STATIC_IMAGES_DIR}/choose_legion")
-STATIC_IMAGES_SANDBOX_DIR:Path= Path(f"{STATIC_IMAGES_DIR}/sandbox")
+STATIC_IMAGES_MAIN_MENU_DIR: Path = Path(f"{STATIC_IMAGES_DIR}/main_menu")
+STATIC_IMAGES_SOLO_DIR: Path = Path(f"{STATIC_IMAGES_DIR}/solo")
+STATIC_IMAGES_LEARN_DIR: Path = Path(f"{STATIC_IMAGES_DIR}/learn")
+STATIC_IMAGES_CHOOSE_LEGION_DIR: Path = Path(f"{STATIC_IMAGES_DIR}/choose_legion")
+STATIC_IMAGES_SANDBOX_DIR: Path = Path(f"{STATIC_IMAGES_DIR}/sandbox")
+PLAYGROUND_PATH: Path = Path(f"{STATIC_IMAGES_SANDBOX_DIR}/playground.png")
 
 
 class ActionableElement(BaseModel):
@@ -321,6 +323,20 @@ class SandboxView(BaseModel):
         return expect_to_be_in_view(
             haystack_path=self.dynamic_screenshot, needle=self.wave_phase_indicator
         )
+
+    def add_shop_towers_buttons_markers(
+        self,
+        image_path: Path = PLAYGROUND_PATH,
+        image_result_path: Path = Path(f"{IMAGES_DIR}/res1.png"),
+    ) -> Path:
+        img = cv.imread(str(image_path))
+        towers = sandbox_view.shop_towers_buttons.towers
+        for tower in towers:
+            cv.drawMarker(
+                img=img, position=tower.center, color=(0, 255, 0), thickness=4
+            )
+        cv.imwrite(str(image_result_path), img)
+        return image_result_path
 
 
 sandbox_view = SandboxView()

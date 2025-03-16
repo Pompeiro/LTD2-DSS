@@ -8,18 +8,21 @@ import pyautogui
 from app.enums import ArenaGrid, ShopGrid
 from app.playground_area_coordinates import grid
 
-#from app.localstack.views import sandbox_view
-
-IMAGES_DIR:str = "app/images"
+IMAGES_DIR: str = "app/images"
 SCREENSHOT_BASE_PATH: Path = Path(f"{IMAGES_DIR}/screenshot.png")
-ARENA_GRID_PATH:Path = Path(f"{IMAGES_DIR}/arena_grid.png")
-SHOP_GRID_PATH:Path = Path(f"{IMAGES_DIR}/shop_grid.png")
+ARENA_GRID_PATH: Path = Path(f"{IMAGES_DIR}/arena_grid.png")
+SHOP_GRID_PATH: Path = Path(f"{IMAGES_DIR}/shop_grid.png")
 STATIC_IMAGES_SANDBOX_DIR: Path = Path(f"{IMAGES_DIR}/static/sandbox")
-PLAYGROUND_PATH:Path= Path(f"{STATIC_IMAGES_SANDBOX_DIR}/playground.png")
+PLAYGROUND_PATH: Path = Path(f"{STATIC_IMAGES_SANDBOX_DIR}/playground.png")
 PLAYGROUND_AREA_PATH: Path = Path(f"{STATIC_IMAGES_SANDBOX_DIR}/playground_area.png")
-PLAYGROUND_AREA_WITH_GRID_PATH: Path = Path(f"{IMAGES_DIR}/playground_area_with_grid.png")
+PLAYGROUND_AREA_WITH_GRID_PATH: Path = Path(
+    f"{IMAGES_DIR}/playground_area_with_grid.png"
+)
 
-def make_screenshot_by_given_display(display: int = 2, path: Path=SCREENSHOT_BASE_PATH) -> Path:
+
+def make_screenshot_by_given_display(
+    display: int = 2, path: Path = SCREENSHOT_BASE_PATH
+) -> Path:
     regions = {1: (0, 0, 1920, 1080), 2: (1920, 0, 1920, 1080)}
     screenshot = pyautogui.screenshot(region=regions.get(display))
     cv_screenshot = cv.cvtColor(np.array(screenshot), cv.COLOR_RGB2BGR)
@@ -27,30 +30,39 @@ def make_screenshot_by_given_display(display: int = 2, path: Path=SCREENSHOT_BAS
     cv.imwrite(filename=str(path), img=cv_screenshot)
     return path
 
+
 def rectangle_on_given_grid(path: Path, grid: ArenaGrid | ShopGrid) -> Path:
-    screenshot_with_rectangle =cv.rectangle(
-    cv.imread(str(path)),
-    (grid.X1, grid.Y1),
+    screenshot_with_rectangle = cv.rectangle(
+        cv.imread(str(path)),
+        (grid.X1, grid.Y1),
         (grid.X2, grid.Y2),
         (0, 255, 0),
-    3,
-)
+        3,
+    )
     cv.imwrite(filename=str(path), img=screenshot_with_rectangle)
     return path
 
-def rectangle_on_shop_grid(path: Path=SHOP_GRID_PATH, grid: ArenaGrid | ShopGrid=ShopGrid) -> Path:
+
+def rectangle_on_shop_grid(
+    path: Path = SHOP_GRID_PATH, grid: ArenaGrid | ShopGrid = ShopGrid
+) -> Path:
     return rectangle_on_given_grid(path=path, grid=grid)
 
 
-def rectangle_on_arena_grid(path: Path=ARENA_GRID_PATH, grid: ArenaGrid | ShopGrid=ArenaGrid) -> Path:
+def rectangle_on_arena_grid(
+    path: Path = ARENA_GRID_PATH, grid: ArenaGrid | ShopGrid = ArenaGrid
+) -> Path:
     return rectangle_on_given_grid(path=path, grid=grid)
+
 
 def add_playground_grid(
-    image_path: Path =Path(PLAYGROUND_AREA_PATH),
-    image_result_path:Path= Path(PLAYGROUND_AREA_WITH_GRID_PATH)
+    image_path: Path = Path(PLAYGROUND_AREA_PATH),
+    image_result_path: Path = Path(PLAYGROUND_AREA_WITH_GRID_PATH),
 ) -> Path:
     img_rgb = cv.imread(str(image_path))
-    full_square_img = cv.imread(str(STATIC_IMAGES_SANDBOX_DIR.joinpath("full_square.png")))
+    full_square_img = cv.imread(
+        str(STATIC_IMAGES_SANDBOX_DIR.joinpath("full_square.png"))
+    )
     # mini_square_img = cv.imread(STATIC_IMAGES_SANDBOX_DIR.joinpath("mini_square.png"))
 
     # Point = namedtuple("Point", ["w", "h"])
@@ -97,6 +109,7 @@ def add_playground_grid(
     cv.imwrite(image_result_path, img_rgb)
     return image_result_path
 
+
 def add_playground_grid_with_perspective(
     image_path: Path = PLAYGROUND_PATH,
     image_result_path: Path = Path(f"{IMAGES_DIR}/res1.png"),
@@ -119,6 +132,7 @@ def add_playground_grid_with_perspective(
             )
     cv.imwrite(str(image_result_path), img)
     return image_result_path
+
 
 def match_template_center(haystack_path: Path, needle_path: Path) -> tuple[int, int]:
     haystack_img = cv.imread(str(haystack_path), cv.COLOR_BGR2GRAY)
@@ -144,22 +158,8 @@ def match_template_center(haystack_path: Path, needle_path: Path) -> tuple[int, 
     return center
 
 
-
-def add_shop_towers_buttons_markers(
-    image_path: Path = PLAYGROUND_PATH,
-    image_result_path: Path = Path(f"{IMAGES_DIR}/res1.png"),
-) -> Path:
-    img = cv.imread(str(image_path))
-    towers = sandbox_view.shop_towers_buttons.towers
-    for tower in towers:
-        cv.drawMarker(
-            img=img, position=tower.center, color=(0, 255, 0), thickness=4
-        )
-    cv.imwrite(str(image_result_path), img)
-    return image_result_path
-
 ###########################################
-def match_template(return_image: bool) -> list[str]:
+def match_template() -> list[str]:
     img_rgb = cv.imread(f"{IMAGES_DIR}/my_screenshot.png")
     img_rgb = img_rgb[
         ArenaGrid.Y1 - ArenaGrid.MARGIN : ArenaGrid.Y2 + ArenaGrid.MARGIN,
@@ -192,13 +192,10 @@ def match_template(return_image: bool) -> list[str]:
                 )
                 matched_units.append(f"Icons/{icon.name}")
         cv.imwrite(f"{IMAGES_DIR}/res.png", img_rgb)
-    if return_image is True:
-        return FileResponse(f"{IMAGES_DIR}/res.png")
     return matched_units
 
 
 def match_template_shop(
-    return_image: bool,
     image_path: str = f"{IMAGES_DIR}/my_screenshot.png",
     grid: ArenaGrid | ShopGrid = ShopGrid,
     image_result_path: str = f"{IMAGES_DIR}/res1.png",
@@ -236,9 +233,4 @@ def match_template_shop(
                 )
                 matched_units.append(f"Icons/{icon.name}")
         cv.imwrite(image_result_path, img_rgb)
-    if return_image is True:
-        return FileResponse(image_result_path)
     return matched_units
-
-
-
