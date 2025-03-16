@@ -1,12 +1,13 @@
-import logging
-import time
 from pathlib import Path
 
-import easyocr
-import pyautogui
 from fastapi import APIRouter, Response
 
-from app.views import sandbox_view
+from app.localstack.sandbox_actions import (
+    check_wave_indicator,
+    fill_whole_grid_with_towers,
+    ocr_event_history_log,
+    place_towers_flow,
+)
 
 STATIC_IMAGES_SANDBOX_DIR = Path("app/images/static/sandbox")
 
@@ -15,95 +16,20 @@ router = APIRouter(prefix="/sandbox-action", tags=["sandbox-action"])
 
 
 @router.get("/fill-grid")
-async def fill_whole_grid_with_towers() -> Response:
-    for i, row in enumerate(sandbox_view.grid):
-        for column in row:
-            if i == 7:
-                i = 6
-            sandbox_view.shop_towers_buttons.towers[i].click()
-            column.click()
-            column.click()
-    return None
+async def fill_whole_grid_with_towers_() -> Response:
+    return fill_whole_grid_with_towers()
 
 
 @router.get("/place-towers-flow")
-async def place_towers_flow(tower_position: int, tower_amount: int) -> list[str]:
-    placed_towers_counter = 0
-    for row in sandbox_view.grid:
-        if placed_towers_counter == tower_amount:
-            break
-        for column in row:
-            sandbox_view.shop_towers_buttons.towers[tower_position].click()
-            column.click()
-            column.click()
-            placed_towers_counter = placed_towers_counter + 1
-            if placed_towers_counter == tower_amount:
-                break
-
-    pyautogui.press("Enter")
-    pyautogui.typewrite("-playback 5.0")
-    pyautogui.press("Enter")
-    sandbox_view.start_button.click()
-
-    reader = easyocr.Reader(["en"])
-
-    filtered_results = []
-    while len(filtered_results) < 1:
-        time.sleep(1)
-        wave_status = True
-        while wave_status is True:
-            time.sleep(0.04)
-            logging.info("This is still wave phase")
-            wave_status = sandbox_view.expect_wave_phase_indicator_to_be_in_view()
-
-        logging.info("wave phase finished")
-        sandbox_view.pause_button.click()
-        pyautogui.moveTo(x=1920 + 100, y=100)
-
-        pyautogui.keyDown("tab")
-        pyautogui.press("winleft")
-        pyautogui.click()
-
-        display = 2
-        regions = {1: (0, 0, 1920, 1080), 2: (1920, 0, 0, 0)}
-        region = tuple(
-            map(
-                sum,
-                zip(
-                    regions.get(display),
-                    sandbox_view.event_history_coordinates.region,
-                    strict=False,
-                ),
-            )
-        )
-        screenshot = pyautogui.screenshot(region=region)
-
-        screenshot.save(STATIC_IMAGES_SANDBOX_DIR.joinpath("event_history_log.png"))
-        pyautogui.keyUp("tab")
-
-        results = reader.readtext(
-            str(STATIC_IMAGES_SANDBOX_DIR.joinpath("event_history_log.png")),
-            detail=False,
-        )
-        filtered_results = list(filter(lambda x: "leak" in x, results))
-
-        sandbox_view.play_button.click()
-
-    sandbox_view.pause_button.click()
-
-    return filtered_results
+async def place_towers_flow_(tower_position: int, tower_amount: int) -> list[str]:
+    return place_towers_flow(tower_position=tower_position, tower_amount=tower_amount)
 
 
 @router.get("/check-wave-indicator")
-async def check_wave_indicator() -> bool:
-    return sandbox_view.expect_wave_phase_indicator_to_be_in_view()
+async def check_wave_indicator_() -> bool:
+    return check_wave_indicator()
 
 
 @router.get("/ocr-event-history-log")
-async def ocr_event_history_log() -> list[str]:
-    reader = easyocr.Reader(["en"])
-    results = reader.readtext(
-        str(STATIC_IMAGES_SANDBOX_DIR.joinpath("event_history_log.png")), detail=False
-    )
-    filtered_results = list(filter(lambda x: "leak" in x, results))
-    return filtered_results
+async def ocr_event_history_log_() -> list[str]:
+    return ocr_event_history_log()
