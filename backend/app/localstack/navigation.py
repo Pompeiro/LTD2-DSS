@@ -13,14 +13,11 @@ from app.localstack.views import (
 
 IMAGES_DIR = "app/images"
 STATIC_IMAGES_DIR = "app/images/static"
-STATIC_IMAGES_MAIN_MENU_DIR:Path = Path(f"{STATIC_IMAGES_DIR}/main_menu")
-STATIC_IMAGES_SOLO_DIR:Path = Path(f"{STATIC_IMAGES_DIR}/solo")
-STATIC_IMAGES_LEARN_DIR:Path = Path(f"{STATIC_IMAGES_DIR}/learn")
-STATIC_IMAGES_CHOOSE_LEGION_DIR:Path = Path(f"{STATIC_IMAGES_DIR}/choose_legion")
-STATIC_IMAGES_SANDBOX_DIR:Path= Path(f"{STATIC_IMAGES_DIR}/sandbox")
-
-
-
+STATIC_IMAGES_MAIN_MENU_DIR: Path = Path(f"{STATIC_IMAGES_DIR}/main_menu")
+STATIC_IMAGES_SOLO_DIR: Path = Path(f"{STATIC_IMAGES_DIR}/solo")
+STATIC_IMAGES_LEARN_DIR: Path = Path(f"{STATIC_IMAGES_DIR}/learn")
+STATIC_IMAGES_CHOOSE_LEGION_DIR: Path = Path(f"{STATIC_IMAGES_DIR}/choose_legion")
+STATIC_IMAGES_SANDBOX_DIR: Path = Path(f"{STATIC_IMAGES_DIR}/sandbox")
 
 
 def navigate_from_main_to_solo_view() -> bool:
@@ -30,12 +27,14 @@ def navigate_from_main_to_solo_view() -> bool:
         return solo_view.expect_to_be_in_view()
     return False
 
+
 def navigate_from_main_to_learn_view() -> bool:
     if main_menu_view.expect_to_be_in_view() is True:
         main_menu_view.navigation_buttons.learn.click()
         time.sleep(1)
         return learn_view.expect_to_be_in_view()
     return False
+
 
 def navigate_from_learn_to_choose_legion_view() -> bool:
     if learn_view.expect_to_be_in_view() is True:
@@ -44,6 +43,7 @@ def navigate_from_learn_to_choose_legion_view() -> bool:
         return choose_legion_view.expect_to_be_in_view()
     return False
 
+
 def choose_legion_view_choose_element_legion() -> bool:
     if choose_legion_view.expect_to_be_in_view() is True:
         choose_legion_view.navigation_buttons.element.click()
@@ -51,8 +51,9 @@ def choose_legion_view_choose_element_legion() -> bool:
         return choose_legion_view.expect_to_be_in_view()
     return False
 
+
 ###
-async def match_template(return_image: bool) -> Response | list[str]:
+async def match_template() -> list[str]:
     img_rgb = cv.imread(main_menu_view.static_screenshot)
     img_gray = cv.cvtColor(img_rgb, cv.COLOR_BGR2GRAY)
     icons = STATIC_IMAGES_MAIN_MENU_DIR
@@ -80,9 +81,4 @@ async def match_template(return_image: bool) -> Response | list[str]:
                 )
                 matched_units.append(f"Icons/{icon.name}")
         cv.imwrite(f"{IMAGES_DIR}/res.png", img_rgb)
-    if return_image is True:
-        return FileResponse(f"{IMAGES_DIR}/res.png")
     return matched_units
-
-
-
