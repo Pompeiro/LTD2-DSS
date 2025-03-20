@@ -1,6 +1,8 @@
 import logging
+import numpy as np
 from pathlib import Path
 
+from app.enums import ArenaGrid, ShopGrid
 import cv2 as cv
 import pyautogui
 from pydantic import BaseModel
@@ -30,6 +32,10 @@ class ActionableElement(BaseModel):
         if is_second_display:
             x = x + 1920
         pyautogui.click(x, y)
+
+class ActionableElementWithRectangle(ActionableElement):
+    tl: tuple[int, int]
+    br: tuple[int, int]
 
 
 def expect_to_be_in_view(
@@ -237,27 +243,30 @@ choose_legion_view = ChooseLegionView()
 
 
 class ShopTowersButtons(BaseModel):
-    offset: tuple[int, int] = (629, 1027)
-    tower_1: ActionableElement = ActionableElement(
-        image_path=None, center=(0 + offset[0], 0 + offset[1])
+    offset_marker: tuple[int, int] = (629, 1027)
+    offset_x: int = 71
+    offset_tl: tuple[int, int] = (597, 996)
+    offset_br: tuple[int, int] = (661, 1060)
+    tower_1: ActionableElementWithRectangle = ActionableElementWithRectangle(tl=(offset_x * 0 + offset_tl[0], offset_tl[1]), br=(offset_x * 0 + offset_br[0], offset_br[1]),
+        image_path=None, center=(offset_x * 0 + offset_marker[0], 0 + offset_marker[1])
     )
-    tower_2: ActionableElement = ActionableElement(
-        image_path=None, center=(71 + offset[0], 0 + offset[1])
+    tower_2:  ActionableElementWithRectangle = ActionableElementWithRectangle(tl=(offset_x * 1 + offset_tl[0], offset_tl[1]), br=(offset_x * 1 + offset_br[0], offset_br[1]),
+        image_path=None, center=(offset_x * 1 + offset_marker[0], 0 + offset_marker[1])
     )
-    tower_3: ActionableElement = ActionableElement(
-        image_path=None, center=(71 * 2 + offset[0], 0 + offset[1])
+    tower_3: ActionableElementWithRectangle = ActionableElementWithRectangle(tl=(offset_x * 2 + offset_tl[0], offset_tl[1]), br=(offset_x * 2 + offset_br[0], offset_br[1]),
+        image_path=None, center=(offset_x *  2 + offset_marker[0], 0 + offset_marker[1])
     )
-    tower_4: ActionableElement = ActionableElement(
-        image_path=None, center=(71 * 3 + offset[0], 0 + offset[1])
+    tower_4: ActionableElementWithRectangle = ActionableElementWithRectangle(tl=(offset_x * 3 + offset_tl[0], offset_tl[1]), br=(offset_x * 3 + offset_br[0], offset_br[1]),
+        image_path=None, center=(offset_x *  3 + offset_marker[0], 0 + offset_marker[1])
     )
-    tower_5: ActionableElement = ActionableElement(
-        image_path=None, center=(71 * 4 + offset[0], 0 + offset[1])
+    tower_5: ActionableElementWithRectangle = ActionableElementWithRectangle(tl=(offset_x * 4 + offset_tl[0], offset_tl[1]), br=(offset_x * 4 + offset_br[0], offset_br[1]),
+        image_path=None, center=(offset_x * 4 + offset_marker[0], 0 + offset_marker[1])
     )
-    tower_6: ActionableElement = ActionableElement(
-        image_path=None, center=(355 + offset[0], 0 + offset[1])
+    tower_6: ActionableElementWithRectangle = ActionableElementWithRectangle(tl=(offset_x * 5 + offset_tl[0], offset_tl[1]), br=(offset_x * 5 + offset_br[0], offset_br[1]),
+        image_path=None, center=(offset_x * 5 + offset_marker[0], 0 + offset_marker[1])
     )
 
-    towers: list[ActionableElement] = [
+    towers: list[ActionableElementWithRectangle] = [
         tower_1,
         tower_2,
         tower_3,
@@ -326,11 +335,11 @@ class SandboxView(BaseModel):
 
     def add_shop_towers_buttons_markers(
         self,
-        image_path: Path = PLAYGROUND_PATH,
+        image_path: Path = Path(f"app/images/screenshot.png"),
         image_result_path: Path = Path(f"{IMAGES_DIR}/res1.png"),
     ) -> Path:
         img = cv.imread(str(image_path))
-        towers = sandbox_view.shop_towers_buttons.towers
+        towers = self.shop_towers_buttons.towers
         for tower in towers:
             cv.drawMarker(
                 img=img, position=tower.center, color=(0, 255, 0), thickness=4
@@ -338,5 +347,58 @@ class SandboxView(BaseModel):
         cv.imwrite(str(image_result_path), img)
         return image_result_path
 
+    
+    def add_shop_towers_buttons_rectangles(
+        self,
+        image_path: Path = Path(f"app/images/screenshot.png"),
+        image_result_path: Path = Path(f"{IMAGES_DIR}/res1.png"),
+    ) -> Path:
+        img = cv.imread(str(image_path))
+        towers = self.shop_towers_buttons.towers
+        for tower in towers:
+            cv.rectangle(
+                img=img, pt1=tower.tl,pt2=tower.br, color=(0, 255, 0), thickness=4
+            )
+        cv.imwrite(str(image_result_path), img)
+        return image_result_path
+
+    def match_template_shop(self,
+        image_path: str = f"{IMAGES_DIR}/screenshot.png",
+        grid: ArenaGrid | ShopGrid = ShopGrid,
+        image_result_path: str = f"{IMAGES_DIR}/res1.png",
+    ) -> list[str]:
+        img_rgb = cv.imread(image_path)
+        towers = self.shop_towers_buttons.towers
+
+        icons = Path(f"{IMAGES_DIR}/icons")
+        matched_units = []
+        for tower in towers:
+           tower_img =cv.cvtColor(img_rgb[tower.tl[1] : tower.br[1],
+                                                    tower.tl[0] : tower.br[0]], cv.COLOR_BGR2GRAY)
+           for icon in icons.iterdir():
+                if icon.name == ".gitignore":
+                    continue
+                template = cv.imread(str(icon), 0)
+                w, h = template.shape[::-1]
+                res = cv.matchTemplate(tower_img, template, cv.TM_CCOEFF_NORMED)
+                threshold = 0.63
+                loc = np.where(res >= threshold)
+                mask = np.zeros(img_rgb.shape[:2], np.uint8)
+                for pt in zip(*loc[::-1], strict=False):
+                    if mask[pt[1] + int(round(h / 2)), pt[0] + int(round(w / 2))] != 255:
+                        mask[pt[1] : pt[1] + h, pt[0] : pt[0] + w] = 255
+                        cv.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), (0, 255, 0), 1)
+                        cv.putText(
+                            img_rgb,
+                            icon.name.split(".")[0],
+                            tower.center,
+                            cv.FONT_HERSHEY_SIMPLEX,
+                            0.5,
+                            (122, 255, 55),
+                        )
+                        matched_units.append(f"Icons/{icon.name}")
+
+        cv.imwrite(image_result_path, img_rgb)
+        return matched_units
 
 sandbox_view = SandboxView()
