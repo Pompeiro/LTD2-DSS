@@ -1,12 +1,12 @@
 import logging
-import numpy as np
 from pathlib import Path
 
-from app.enums import ArenaGrid, ShopGrid
 import cv2 as cv
+import numpy as np
 import pyautogui
 from pydantic import BaseModel
 
+from app.enums import ArenaGrid, ShopGrid
 from app.localstack.images import (
     make_screenshot_by_given_display,
     match_template_center,
@@ -32,6 +32,7 @@ class ActionableElement(BaseModel):
         if is_second_display:
             x = x + 1920
         pyautogui.click(x, y)
+
 
 class ActionableElementWithRectangle(ActionableElement):
     tl: tuple[int, int]
@@ -247,23 +248,41 @@ class ShopTowersButtons(BaseModel):
     offset_x: int = 71
     offset_tl: tuple[int, int] = (597, 996)
     offset_br: tuple[int, int] = (661, 1060)
-    tower_1: ActionableElementWithRectangle = ActionableElementWithRectangle(tl=(offset_x * 0 + offset_tl[0], offset_tl[1]), br=(offset_x * 0 + offset_br[0], offset_br[1]),
-        image_path=None, center=(offset_x * 0 + offset_marker[0], 0 + offset_marker[1])
+    tower_1: ActionableElementWithRectangle = ActionableElementWithRectangle(
+        tl=(offset_x * 0 + offset_tl[0], offset_tl[1]),
+        br=(offset_x * 0 + offset_br[0], offset_br[1]),
+        image_path=None,
+        center=(offset_x * 0 + offset_marker[0], 0 + offset_marker[1]),
     )
-    tower_2:  ActionableElementWithRectangle = ActionableElementWithRectangle(tl=(offset_x * 1 + offset_tl[0], offset_tl[1]), br=(offset_x * 1 + offset_br[0], offset_br[1]),
-        image_path=None, center=(offset_x * 1 + offset_marker[0], 0 + offset_marker[1])
+    tower_2: ActionableElementWithRectangle = ActionableElementWithRectangle(
+        tl=(offset_x * 1 + offset_tl[0], offset_tl[1]),
+        br=(offset_x * 1 + offset_br[0], offset_br[1]),
+        image_path=None,
+        center=(offset_x * 1 + offset_marker[0], 0 + offset_marker[1]),
     )
-    tower_3: ActionableElementWithRectangle = ActionableElementWithRectangle(tl=(offset_x * 2 + offset_tl[0], offset_tl[1]), br=(offset_x * 2 + offset_br[0], offset_br[1]),
-        image_path=None, center=(offset_x *  2 + offset_marker[0], 0 + offset_marker[1])
+    tower_3: ActionableElementWithRectangle = ActionableElementWithRectangle(
+        tl=(offset_x * 2 + offset_tl[0], offset_tl[1]),
+        br=(offset_x * 2 + offset_br[0], offset_br[1]),
+        image_path=None,
+        center=(offset_x * 2 + offset_marker[0], 0 + offset_marker[1]),
     )
-    tower_4: ActionableElementWithRectangle = ActionableElementWithRectangle(tl=(offset_x * 3 + offset_tl[0], offset_tl[1]), br=(offset_x * 3 + offset_br[0], offset_br[1]),
-        image_path=None, center=(offset_x *  3 + offset_marker[0], 0 + offset_marker[1])
+    tower_4: ActionableElementWithRectangle = ActionableElementWithRectangle(
+        tl=(offset_x * 3 + offset_tl[0], offset_tl[1]),
+        br=(offset_x * 3 + offset_br[0], offset_br[1]),
+        image_path=None,
+        center=(offset_x * 3 + offset_marker[0], 0 + offset_marker[1]),
     )
-    tower_5: ActionableElementWithRectangle = ActionableElementWithRectangle(tl=(offset_x * 4 + offset_tl[0], offset_tl[1]), br=(offset_x * 4 + offset_br[0], offset_br[1]),
-        image_path=None, center=(offset_x * 4 + offset_marker[0], 0 + offset_marker[1])
+    tower_5: ActionableElementWithRectangle = ActionableElementWithRectangle(
+        tl=(offset_x * 4 + offset_tl[0], offset_tl[1]),
+        br=(offset_x * 4 + offset_br[0], offset_br[1]),
+        image_path=None,
+        center=(offset_x * 4 + offset_marker[0], 0 + offset_marker[1]),
     )
-    tower_6: ActionableElementWithRectangle = ActionableElementWithRectangle(tl=(offset_x * 5 + offset_tl[0], offset_tl[1]), br=(offset_x * 5 + offset_br[0], offset_br[1]),
-        image_path=None, center=(offset_x * 5 + offset_marker[0], 0 + offset_marker[1])
+    tower_6: ActionableElementWithRectangle = ActionableElementWithRectangle(
+        tl=(offset_x * 5 + offset_tl[0], offset_tl[1]),
+        br=(offset_x * 5 + offset_br[0], offset_br[1]),
+        image_path=None,
+        center=(offset_x * 5 + offset_marker[0], 0 + offset_marker[1]),
     )
 
     towers: list[ActionableElementWithRectangle] = [
@@ -335,7 +354,7 @@ class SandboxView(BaseModel):
 
     def add_shop_towers_buttons_markers(
         self,
-        image_path: Path = Path(f"app/images/screenshot.png"),
+        image_path: Path = Path("app/images/screenshot.png"),
         image_result_path: Path = Path(f"{IMAGES_DIR}/res1.png"),
     ) -> Path:
         img = cv.imread(str(image_path))
@@ -347,22 +366,22 @@ class SandboxView(BaseModel):
         cv.imwrite(str(image_result_path), img)
         return image_result_path
 
-    
     def add_shop_towers_buttons_rectangles(
         self,
-        image_path: Path = Path(f"app/images/screenshot.png"),
+        image_path: Path = Path("app/images/screenshot.png"),
         image_result_path: Path = Path(f"{IMAGES_DIR}/res1.png"),
     ) -> Path:
         img = cv.imread(str(image_path))
         towers = self.shop_towers_buttons.towers
         for tower in towers:
             cv.rectangle(
-                img=img, pt1=tower.tl,pt2=tower.br, color=(0, 255, 0), thickness=4
+                img=img, pt1=tower.tl, pt2=tower.br, color=(0, 255, 0), thickness=4
             )
         cv.imwrite(str(image_result_path), img)
         return image_result_path
 
-    def match_template_shop(self,
+    def match_template_shop(
+        self,
         image_path: str = f"{IMAGES_DIR}/screenshot.png",
         grid: ArenaGrid | ShopGrid = ShopGrid,
         image_result_path: str = f"{IMAGES_DIR}/res1.png",
@@ -373,9 +392,11 @@ class SandboxView(BaseModel):
         icons = Path(f"{IMAGES_DIR}/icons")
         matched_units = []
         for tower in towers:
-           tower_img =cv.cvtColor(img_rgb[tower.tl[1] : tower.br[1],
-                                                    tower.tl[0] : tower.br[0]], cv.COLOR_BGR2GRAY)
-           for icon in icons.iterdir():
+            tower_img = cv.cvtColor(
+                img_rgb[tower.tl[1] : tower.br[1], tower.tl[0] : tower.br[0]],
+                cv.COLOR_BGR2GRAY,
+            )
+            for icon in icons.iterdir():
                 if icon.name == ".gitignore":
                     continue
                 template = cv.imread(str(icon), 0)
@@ -385,9 +406,14 @@ class SandboxView(BaseModel):
                 loc = np.where(res >= threshold)
                 mask = np.zeros(img_rgb.shape[:2], np.uint8)
                 for pt in zip(*loc[::-1], strict=False):
-                    if mask[pt[1] + int(round(h / 2)), pt[0] + int(round(w / 2))] != 255:
+                    if (
+                        mask[pt[1] + int(round(h / 2)), pt[0] + int(round(w / 2))]
+                        != 255
+                    ):
                         mask[pt[1] : pt[1] + h, pt[0] : pt[0] + w] = 255
-                        cv.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), (0, 255, 0), 1)
+                        cv.rectangle(
+                            img_rgb, pt, (pt[0] + w, pt[1] + h), (0, 255, 0), 1
+                        )
                         cv.putText(
                             img_rgb,
                             icon.name.split(".")[0],
@@ -400,5 +426,6 @@ class SandboxView(BaseModel):
 
         cv.imwrite(image_result_path, img_rgb)
         return matched_units
+
 
 sandbox_view = SandboxView()
