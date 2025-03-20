@@ -8,7 +8,8 @@ import pyautogui
 from app.localstack.views import sandbox_view
 
 STATIC_IMAGES_SANDBOX_DIR = Path("app/images/static/sandbox")
-
+def click_to_activate_game_window()-> None:
+    pyautogui.click(x=1920 + 100, y=100)   
 
 def fill_whole_grid_with_towers() -> None:
     for i, row in enumerate(sandbox_view.grid):
@@ -21,7 +22,8 @@ def fill_whole_grid_with_towers() -> None:
     return None
 
 
-def place_towers_flow(tower_position: int, tower_amount: int) -> list[str]:
+def place_towers_by_tower_position_and_tower_amount(tower_position: int, tower_amount: int) ->None: 
+    click_to_activate_game_window()
     placed_towers_counter = 0
     for row in sandbox_view.grid:
         if placed_towers_counter == tower_amount:
@@ -34,9 +36,16 @@ def place_towers_flow(tower_position: int, tower_amount: int) -> list[str]:
             if placed_towers_counter == tower_amount:
                 break
 
+def set_game_playback_by_playback_value(playback_value: float=5.0)-> None:
+    click_to_activate_game_window()
     pyautogui.press("Enter")
-    pyautogui.typewrite("-playback 5.0")
+    pyautogui.typewrite(message=f"-playback {playback_value}")
     pyautogui.press("Enter")
+    return None
+
+def place_towers_flow(tower_position: int, tower_amount: int) -> list[str]:
+    place_towers_flow(tower_position=tower_position, tower_amount=tower_amount)
+    set_game_playback_by_playback_value(playback_value=5.0)
     sandbox_view.start_button.click()
 
     reader = easyocr.Reader(["en"])
@@ -99,3 +108,10 @@ def ocr_event_history_log() -> list[str]:
     )
     filtered_results = list(filter(lambda x: "leak" in x, results))
     return filtered_results
+
+def set_initial_sandbox_view_position() -> None:
+    click_to_activate_game_window()
+    pyautogui.press("F1")
+    time.sleep(0.3)
+    pyautogui.scroll(-500)
+    return None
