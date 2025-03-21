@@ -5,6 +5,7 @@ from pathlib import Path
 import easyocr
 import pyautogui
 
+from app.localstack.images import make_screenshot_by_given_region_and_display
 from app.localstack.views import sandbox_view
 
 STATIC_IMAGES_SANDBOX_DIR = Path("app/images/static/sandbox")
@@ -15,6 +16,7 @@ def click_to_activate_game_window() -> None:
 
 
 def fill_whole_grid_with_towers() -> None:
+    click_to_activate_game_window()
     for i, row in enumerate(sandbox_view.grid):
         for column in row:
             if i == 7:
@@ -50,12 +52,36 @@ def set_game_playback_by_playback_value(playback_value: float = 5.0) -> None:
     return None
 
 
-def place_towers_flow(tower_position: int, tower_amount: int) -> list[str]:
-    place_towers_flow(tower_position=tower_position, tower_amount=tower_amount)
-    set_game_playback_by_playback_value(playback_value=5.0)
-    sandbox_view.start_button.click()
+def open_and_filter_event_log() -> Path:
+    click_to_activate_game_window()
+
+    pyautogui.keyDown("tab")
+    pyautogui.press("winleft")
+
+    path = make_screenshot_by_given_region_and_display(
+        region=sandbox_view.event_history_coordinates.region,
+        display=2,
+        path=STATIC_IMAGES_SANDBOX_DIR.joinpath("event_history_log.png"),
+    )
+
+    pyautogui.keyUp("tab")
 
     reader = easyocr.Reader(["en"])
+
+    results = reader.readtext(str(path), detail=False)
+    filtered_results = list(filter(lambda x: "leak" in x, results))
+
+    return filtered_results
+
+
+def place_towers_and_wait_until_leak(
+    tower_position: int, tower_amount: int
+) -> list[str]:
+    place_towers_by_tower_position_and_tower_amount(
+        tower_position=tower_position, tower_amount=tower_amount
+    )
+    set_game_playback_by_playback_value(playback_value=5.0)
+    sandbox_view.start_button.click()
 
     filtered_results = []
     while len(filtered_results) < 1:
@@ -68,34 +94,8 @@ def place_towers_flow(tower_position: int, tower_amount: int) -> list[str]:
 
         logging.info("wave phase finished")
         sandbox_view.pause_button.click()
-        pyautogui.moveTo(x=1920 + 100, y=100)
 
-        pyautogui.keyDown("tab")
-        pyautogui.press("winleft")
-        pyautogui.click()
-
-        display = 2
-        regions = {1: (0, 0, 1920, 1080), 2: (1920, 0, 0, 0)}
-        region = tuple(
-            map(
-                sum,
-                zip(
-                    regions.get(display),
-                    sandbox_view.event_history_coordinates.region,
-                    strict=False,
-                ),
-            )
-        )
-        screenshot = pyautogui.screenshot(region=region)
-
-        screenshot.save(STATIC_IMAGES_SANDBOX_DIR.joinpath("event_history_log.png"))
-        pyautogui.keyUp("tab")
-
-        results = reader.readtext(
-            str(STATIC_IMAGES_SANDBOX_DIR.joinpath("event_history_log.png")),
-            detail=False,
-        )
-        filtered_results = list(filter(lambda x: "leak" in x, results))
+        filtered_results = open_and_filter_event_log()
 
         sandbox_view.play_button.click()
 

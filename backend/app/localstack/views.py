@@ -4,12 +4,14 @@ from pathlib import Path
 import cv2 as cv
 import numpy as np
 import pyautogui
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
 
 from app.enums import ArenaGrid, ShopGrid
 from app.localstack.images import (
     make_screenshot_by_given_display,
+    make_screenshot_by_given_region_and_display,
     match_template_center,
+    match_template_threshold,
 )
 from app.playground_area_coordinates import GridRectangle, grid
 
@@ -38,6 +40,10 @@ class ActionableElementWithRectangle(ActionableElement):
     tl: tuple[int, int]
     br: tuple[int, int]
 
+    @computed_field
+    def br_relative_to_tl(self) -> tuple[int, int]:
+        return (self.br[0] - self.tl[0], self.br[1] - self.tl[1])
+
 
 def expect_to_be_in_view(
     haystack_path: Path, needle: ActionableElement, threshold: int = 5
@@ -53,6 +59,20 @@ def expect_to_be_in_view(
     result = fit_x and fit_y
     logging.info("Current needle: %s", needle.image_path.stem)
     logging.info("Is needle in view?: %s", result)
+    return result
+
+
+def expect_to_be_in_view_region_area(
+    haystack_path: Path, needle: ActionableElementWithRectangle
+) -> bool:
+    make_screenshot_by_given_region_and_display(
+        region=needle.tl + needle.br_relative_to_tl, display=2, path=haystack_path
+    )
+    result = match_template_threshold(
+        haystack_path=haystack_path, needle_path=needle.image_path
+    )
+    logging.info("Current needle: %s", needle.image_path.stem)
+    logging.info("Is needle in REGION view?: %s", result)
     return result
 
 
@@ -296,7 +316,7 @@ class ShopTowersButtons(BaseModel):
 
 
 class EventHistoryCoordinates(BaseModel):
-    region: tuple[int, int] = (950, 332, 340, 580)
+    region: tuple[int, int, int, int] = (950, 332, 340, 580)
     tl: tuple[int, int] = (950, 332)
     br: tuple[int, int] = (340, 580)
 
@@ -328,9 +348,13 @@ class SandboxView(BaseModel):
         image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("upgrade_king_menu_button.png"),
         center=(549, 1009),
     )
-    wave_phase_indicator: ActionableElement = ActionableElement(
-        image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("wave_phase_indicator.png"),
-        center=(961, 109),
+    wave_phase_indicator: ActionableElementWithRectangle = (
+        ActionableElementWithRectangle(
+            image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("wave_phase_indicator.png"),
+            center=(962, 113),
+            tl=(954, 105),
+            br=(970, 121),
+        )
     )
 
     event_history_text: ActionableElement = ActionableElement(
@@ -348,7 +372,7 @@ class SandboxView(BaseModel):
         )
 
     def expect_wave_phase_indicator_to_be_in_view(self) -> bool:
-        return expect_to_be_in_view(
+        return expect_to_be_in_view_region_area(
             haystack_path=self.dynamic_screenshot, needle=self.wave_phase_indicator
         )
 
