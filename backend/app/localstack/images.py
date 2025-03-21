@@ -18,6 +18,9 @@ PLAYGROUND_AREA_PATH: Path = Path(f"{STATIC_IMAGES_SANDBOX_DIR}/playground_area.
 PLAYGROUND_AREA_WITH_GRID_PATH: Path = Path(
     f"{IMAGES_DIR}/playground_area_with_grid.png"
 )
+EVENT_HISTORY_LOG_PATH: Path = Path(
+    f"{STATIC_IMAGES_SANDBOX_DIR}/event_history_log.png"
+)
 
 
 def make_screenshot_by_given_display(
@@ -28,6 +31,28 @@ def make_screenshot_by_given_display(
     cv_screenshot = cv.cvtColor(np.array(screenshot), cv.COLOR_RGB2BGR)
 
     cv.imwrite(filename=str(path), img=cv_screenshot)
+    return path
+
+
+def make_screenshot_by_given_region_and_display(
+    region: tuple[int, int, int, int],
+    display: int = 2,
+    path: Path = EVENT_HISTORY_LOG_PATH,
+) -> Path:
+    regions = {1: (0, 0, 1920, 1080), 2: (1920, 0, 0, 0)}
+    region_on_given_display = tuple(
+        map(
+            sum,
+            zip(
+                regions.get(display),
+                region,
+                strict=False,
+            ),
+        )
+    )
+
+    screenshot = pyautogui.screenshot(region=region_on_given_display)
+    screenshot.save(path)
     return path
 
 
@@ -137,7 +162,6 @@ def add_playground_grid_with_perspective(
 def match_template_center(haystack_path: Path, needle_path: Path) -> tuple[int, int]:
     haystack_img = cv.imread(str(haystack_path), cv.COLOR_BGR2GRAY)
     needle_img = cv.imread(str(needle_path), cv.COLOR_BGR2GRAY)
-
     result = cv.matchTemplate(haystack_img, needle_img, cv.TM_CCOEFF_NORMED)
 
     min_val, max_val, min_loc, max_loc = cv.minMaxLoc(result)
@@ -156,6 +180,31 @@ def match_template_center(haystack_path: Path, needle_path: Path) -> tuple[int, 
     cv.circle(haystack_img, center, 5, (0, 0, 255), -1)
     cv.imwrite(f"{IMAGES_DIR}/res.png", haystack_img)
     return center
+
+
+def match_template_threshold(haystack_path: Path, needle_path: Path) -> bool:
+    haystack_img = cv.imread(str(haystack_path), cv.COLOR_BGR2GRAY)
+    needle_img = cv.imread(str(needle_path), cv.COLOR_BGR2GRAY)
+    result = cv.matchTemplate(haystack_img, needle_img, cv.TM_CCOEFF_NORMED)
+
+    min_val, max_val, min_loc, max_loc = cv.minMaxLoc(result)
+
+    if max_val >= 0.9:
+        top_left = max_loc
+
+        needle_h, needle_w = needle_img.shape[:2]
+
+        center_x = top_left[0] + needle_w // 2
+        center_y = top_left[1] + needle_h // 2
+
+        center = (center_x, center_y)
+
+        bottom_right = (top_left[0] + needle_w, top_left[1] + needle_h)
+        cv.rectangle(haystack_img, top_left, bottom_right, (0, 255, 0), 2)
+        cv.circle(haystack_img, center, 5, (0, 0, 255), -1)
+        cv.imwrite(f"{IMAGES_DIR}/res.png", haystack_img)
+        return True
+    return False
 
 
 ###########################################
