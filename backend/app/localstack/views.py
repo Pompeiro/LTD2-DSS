@@ -3,8 +3,7 @@ from pathlib import Path
 
 import cv2 as cv
 import numpy as np
-import pyautogui
-from pydantic import BaseModel, computed_field
+from pydantic import BaseModel
 
 from app.enums import ArenaGrid, ShopGrid
 from app.localstack.images import (
@@ -13,7 +12,8 @@ from app.localstack.images import (
     match_template_center,
     match_template_threshold,
 )
-from app.playground_area_coordinates import GridRectangle, grid
+from app.localstack.models import ActionableElement, Point, Rectangle
+from app.playground_area_coordinates import grid
 
 IMAGES_DIR = "app/images"
 STATIC_IMAGES_DIR = "app/images/static"
@@ -23,26 +23,6 @@ STATIC_IMAGES_LEARN_DIR: Path = Path(f"{STATIC_IMAGES_DIR}/learn")
 STATIC_IMAGES_CHOOSE_LEGION_DIR: Path = Path(f"{STATIC_IMAGES_DIR}/choose_legion")
 STATIC_IMAGES_SANDBOX_DIR: Path = Path(f"{STATIC_IMAGES_DIR}/sandbox")
 PLAYGROUND_PATH: Path = Path(f"{STATIC_IMAGES_SANDBOX_DIR}/playground.png")
-
-
-class ActionableElement(BaseModel):
-    image_path: Path | None
-    center: tuple[int, int]
-
-    def click(self, is_second_display: bool = True):
-        x, y = self.center
-        if is_second_display:
-            x = x + 1920
-        pyautogui.click(x, y)
-
-
-class ActionableElementWithRectangle(ActionableElement):
-    tl: tuple[int, int]
-    br: tuple[int, int]
-
-    @computed_field
-    def br_relative_to_tl(self) -> tuple[int, int]:
-        return (self.br[0] - self.tl[0], self.br[1] - self.tl[1])
 
 
 def expect_to_be_in_view(
@@ -63,7 +43,7 @@ def expect_to_be_in_view(
 
 
 def expect_to_be_in_view_region_area(
-    haystack_path: Path, needle: ActionableElementWithRectangle
+    haystack_path: Path, needle: ActionableElement
 ) -> bool:
     make_screenshot_by_given_region_and_display(
         region=needle.tl + needle.br_relative_to_tl, display=2, path=haystack_path
@@ -264,48 +244,53 @@ choose_legion_view = ChooseLegionView()
 
 
 class ShopTowersButtons(BaseModel):
-    offset_marker: tuple[int, int] = (629, 1027)
     offset_x: int = 71
-    offset_tl: tuple[int, int] = (597, 996)
-    offset_br: tuple[int, int] = (661, 1060)
-    tower_1: ActionableElementWithRectangle = ActionableElementWithRectangle(
-        tl=(offset_x * 0 + offset_tl[0], offset_tl[1]),
-        br=(offset_x * 0 + offset_br[0], offset_br[1]),
-        image_path=None,
-        center=(offset_x * 0 + offset_marker[0], 0 + offset_marker[1]),
-    )
-    tower_2: ActionableElementWithRectangle = ActionableElementWithRectangle(
-        tl=(offset_x * 1 + offset_tl[0], offset_tl[1]),
-        br=(offset_x * 1 + offset_br[0], offset_br[1]),
-        image_path=None,
-        center=(offset_x * 1 + offset_marker[0], 0 + offset_marker[1]),
-    )
-    tower_3: ActionableElementWithRectangle = ActionableElementWithRectangle(
-        tl=(offset_x * 2 + offset_tl[0], offset_tl[1]),
-        br=(offset_x * 2 + offset_br[0], offset_br[1]),
-        image_path=None,
-        center=(offset_x * 2 + offset_marker[0], 0 + offset_marker[1]),
-    )
-    tower_4: ActionableElementWithRectangle = ActionableElementWithRectangle(
-        tl=(offset_x * 3 + offset_tl[0], offset_tl[1]),
-        br=(offset_x * 3 + offset_br[0], offset_br[1]),
-        image_path=None,
-        center=(offset_x * 3 + offset_marker[0], 0 + offset_marker[1]),
-    )
-    tower_5: ActionableElementWithRectangle = ActionableElementWithRectangle(
-        tl=(offset_x * 4 + offset_tl[0], offset_tl[1]),
-        br=(offset_x * 4 + offset_br[0], offset_br[1]),
-        image_path=None,
-        center=(offset_x * 4 + offset_marker[0], 0 + offset_marker[1]),
-    )
-    tower_6: ActionableElementWithRectangle = ActionableElementWithRectangle(
-        tl=(offset_x * 5 + offset_tl[0], offset_tl[1]),
-        br=(offset_x * 5 + offset_br[0], offset_br[1]),
-        image_path=None,
-        center=(offset_x * 5 + offset_marker[0], 0 + offset_marker[1]),
+    offset_tl: Point = Point(x=597, y=996)
+    offset_br: Point = Point(x=661, y=1060)
+
+    tower_1: ActionableElement = ActionableElement(
+        rectangle=Rectangle(
+            tl=Point(x=offset_x * 0 + offset_tl.x, y=offset_tl.y),
+            br=Point(x=offset_x * 0 + offset_br.x, y=offset_br.y),
+        )
     )
 
-    towers: list[ActionableElementWithRectangle] = [
+    tower_2: ActionableElement = ActionableElement(
+        rectangle=Rectangle(
+            tl=Point(x=offset_x * 1 + offset_tl.x, y=offset_tl.y),
+            br=Point(x=offset_x * 1 + offset_br.x, y=offset_br.y),
+        )
+    )
+
+    tower_3: ActionableElement = ActionableElement(
+        rectangle=Rectangle(
+            tl=Point(x=offset_x * 2 + offset_tl.x, y=offset_tl.y),
+            br=Point(x=offset_x * 2 + offset_br.x, y=offset_br.y),
+        )
+    )
+
+    tower_4: ActionableElement = ActionableElement(
+        rectangle=Rectangle(
+            tl=Point(x=offset_x * 3 + offset_tl.x, y=offset_tl.y),
+            br=Point(x=offset_x * 3 + offset_br.x, y=offset_br.y),
+        )
+    )
+
+    tower_5: ActionableElement = ActionableElement(
+        rectangle=Rectangle(
+            tl=Point(x=offset_x * 4 + offset_tl.x, y=offset_tl.y),
+            br=Point(x=offset_x * 4 + offset_br.x, y=offset_br.y),
+        )
+    )
+
+    tower_6: ActionableElement = ActionableElement(
+        rectangle=Rectangle(
+            tl=Point(x=offset_x * 5 + offset_tl.x, y=offset_tl.y),
+            br=Point(x=offset_x * 5 + offset_br.x, y=offset_br.y),
+        )
+    )
+
+    towers: list[ActionableElement] = [
         tower_1,
         tower_2,
         tower_3,
@@ -313,23 +298,6 @@ class ShopTowersButtons(BaseModel):
         tower_5,
         tower_6,
     ]
-
-
-class RegionCoordinates(BaseModel):
-    tl: tuple[int, int]
-    br: tuple[int, int]
-
-    @computed_field
-    def br_relative_to_tl(self) -> tuple[int, int]:
-        return (self.br[0] - self.tl[0], self.br[1] - self.tl[1])
-
-    @computed_field
-    def region(self) -> tuple[int, int, int, int]:
-        return self.tl + self.br
-
-    @computed_field
-    def region_relative(self) -> tuple[int, int, int, int]:
-        return self.tl + self.br_relative_to_tl
 
 
 class SandboxView(BaseModel):
@@ -360,28 +328,24 @@ class SandboxView(BaseModel):
         image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("upgrade_king_menu_button.png"),
         center=(549, 1009),
     )
-    wave_phase_indicator: ActionableElementWithRectangle = (
-        ActionableElementWithRectangle(
-            image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("wave_phase_indicator.png"),
-            center=(962, 113),
-            tl=(954, 105),
-            br=(970, 121),
-        )
+    wave_phase_indicator: ActionableElement = ActionableElement(
+        rectangle=Rectangle(tl=Point(x=954, y=105), br=Point(x=970, y=121)),
+        image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("wave_phase_indicator.png"),
     )
 
     event_history_text: ActionableElement = ActionableElement(
         image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("event_history_text.png"),
         center=(1004, 344),
     )
-    event_history_coordinates: RegionCoordinates = RegionCoordinates(
-        tl=(950, 332), br=(1290, 912)
+    event_history_coordinates: Rectangle = Rectangle(
+        tl=Point(x=950, y=332), br=Point(x=1290, y=912)
     )
-    event_coordinates: RegionCoordinates = RegionCoordinates(
-        tl=(64, 380), br=(382, 778)
+    event_coordinates: Rectangle = Rectangle(
+        tl=Point(x=64, y=380), br=Point(x=382, y=778)
     )
 
     shop_towers_buttons: ShopTowersButtons = ShopTowersButtons()
-    grid: list[list[GridRectangle]] = grid
+    grid: list[list[Rectangle]] = grid
 
     def expect_ready_button_to_be_in_view(self) -> bool:
         return expect_to_be_in_view(
