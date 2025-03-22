@@ -315,15 +315,27 @@ class ShopTowersButtons(BaseModel):
     ]
 
 
-class EventHistoryCoordinates(BaseModel):
-    region: tuple[int, int, int, int] = (950, 332, 340, 580)
-    tl: tuple[int, int] = (950, 332)
-    br: tuple[int, int] = (340, 580)
+class RegionCoordinates(BaseModel):
+    tl: tuple[int, int]
+    br: tuple[int, int]
+
+    @computed_field
+    def br_relative_to_tl(self) -> tuple[int, int]:
+        return (self.br[0] - self.tl[0], self.br[1] - self.tl[1])
+
+    @computed_field
+    def region(self) -> tuple[int, int, int, int]:
+        return self.tl + self.br
+
+    @computed_field
+    def region_relative(self) -> tuple[int, int, int, int]:
+        return self.tl + self.br_relative_to_tl
 
 
 class SandboxView(BaseModel):
     static_screenshot: Path = Path(f"{STATIC_IMAGES_SANDBOX_DIR}/sandbox.png")
     dynamic_screenshot: Path = Path(f"{STATIC_IMAGES_SANDBOX_DIR}/sandbox_dynamic.png")
+    event_text_screenshot: Path = Path(f"{STATIC_IMAGES_SANDBOX_DIR}/event_text.png")
     ready_button: ActionableElement = ActionableElement(
         image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("ready_button.png"),
         center=(959, 186),
@@ -361,7 +373,12 @@ class SandboxView(BaseModel):
         image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("event_history_text.png"),
         center=(1004, 344),
     )
-    event_history_coordinates: EventHistoryCoordinates = EventHistoryCoordinates()
+    event_history_coordinates: RegionCoordinates = RegionCoordinates(
+        tl=(950, 332), br=(1290, 912)
+    )
+    event_coordinates: RegionCoordinates = RegionCoordinates(
+        tl=(64, 380), br=(382, 778)
+    )
 
     shop_towers_buttons: ShopTowersButtons = ShopTowersButtons()
     grid: list[list[GridRectangle]] = grid

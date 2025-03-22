@@ -2,10 +2,12 @@ import logging
 import time
 from pathlib import Path
 
-import easyocr
 import pyautogui
 
-from app.localstack.images import make_screenshot_by_given_region_and_display
+from app.localstack.images import (
+    make_screenshot_by_given_region_and_display,
+    ocr_by_path,
+)
 from app.localstack.views import sandbox_view
 
 STATIC_IMAGES_SANDBOX_DIR = Path("app/images/static/sandbox")
@@ -52,26 +54,32 @@ def set_game_playback_by_playback_value(playback_value: float = 5.0) -> None:
     return None
 
 
-def open_and_filter_event_log() -> Path:
+def make_screenshot_of_event_history_log() -> Path:
     click_to_activate_game_window()
 
     pyautogui.keyDown("tab")
     pyautogui.press("winleft")
 
     path = make_screenshot_by_given_region_and_display(
-        region=sandbox_view.event_history_coordinates.region,
+        region=sandbox_view.event_history_coordinates.region_relative,
         display=2,
         path=STATIC_IMAGES_SANDBOX_DIR.joinpath("event_history_log.png"),
     )
 
     pyautogui.keyUp("tab")
 
-    reader = easyocr.Reader(["en"])
+    return path
 
-    results = reader.readtext(str(path), detail=False)
-    filtered_results = list(filter(lambda x: "leak" in x, results))
 
-    return filtered_results
+def make_screenshot_of_event_text() -> Path:
+    pyautogui.press("F2")
+    path = make_screenshot_by_given_region_and_display(
+        region=sandbox_view.event_coordinates.region_relative,
+        display=2,
+        path=sandbox_view.event_text_screenshot,
+    )
+
+    return path
 
 
 def place_towers_and_wait_until_leak(
@@ -95,7 +103,10 @@ def place_towers_and_wait_until_leak(
         logging.info("wave phase finished")
         sandbox_view.pause_button.click()
 
-        filtered_results = open_and_filter_event_log()
+        event_text_path = make_screenshot_of_event_text()
+        filtered_results = ocr_by_path(path=event_text_path)
+        # event_history_log_path = make_screenshot_of_event_history_log()
+        # ocr_by_path(path=event_history_log_path)
 
         sandbox_view.play_button.click()
 
@@ -106,15 +117,6 @@ def place_towers_and_wait_until_leak(
 
 def check_wave_indicator() -> bool:
     return sandbox_view.expect_wave_phase_indicator_to_be_in_view()
-
-
-def ocr_event_history_log() -> list[str]:
-    reader = easyocr.Reader(["en"])
-    results = reader.readtext(
-        str(STATIC_IMAGES_SANDBOX_DIR.joinpath("event_history_log.png")), detail=False
-    )
-    filtered_results = list(filter(lambda x: "leak" in x, results))
-    return filtered_results
 
 
 def set_initial_sandbox_view_position() -> None:

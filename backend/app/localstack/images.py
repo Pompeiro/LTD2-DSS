@@ -4,6 +4,7 @@ from pathlib import Path
 import cv2 as cv
 import numpy as np
 import pyautogui
+import pytesseract
 
 from app.enums import ArenaGrid, ShopGrid
 from app.playground_area_coordinates import grid
@@ -157,6 +158,18 @@ def add_playground_grid_with_perspective(
             )
     cv.imwrite(str(image_result_path), img)
     return image_result_path
+
+
+def ocr_by_path(path: Path = EVENT_HISTORY_LOG_PATH) -> list[str]:
+    img_cv = cv.imread(str(path))
+    img_rgb = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
+
+    result = pytesseract.image_to_string(img_rgb)
+
+    results = result.split("\n")
+    filtered_results = list(filter(lambda x: "leak" in x, results))
+
+    return filtered_results
 
 
 def match_template_center(haystack_path: Path, needle_path: Path) -> tuple[int, int]:
