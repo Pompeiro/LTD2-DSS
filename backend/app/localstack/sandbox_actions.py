@@ -14,7 +14,7 @@ STATIC_IMAGES_SANDBOX_DIR = Path("app/images/static/sandbox")
 
 
 def click_to_activate_game_window() -> None:
-    pyautogui.click(x=1920 + 100, y=100)
+    pyautogui.click(x=1920 + 100, y=250)
 
 
 def fill_whole_grid_with_towers() -> None:
@@ -46,11 +46,37 @@ def place_towers_by_tower_position_and_tower_amount(
                 break
 
 
-def set_game_playback_by_playback_value(playback_value: float = 5.0) -> None:
+def send_chat_message_by_message(message: str) -> None:
+    pyautogui.press("Enter")
+    time.sleep(0.05)
+    pyautogui.typewrite(message=message)
+    pyautogui.press("Enter")
+    return None
+
+
+def set_game_playback_by_playback_value(playback_value: float = 10.0) -> None:
     click_to_activate_game_window()
-    pyautogui.press("Enter")
-    pyautogui.typewrite(message=f"-playback {playback_value}")
-    pyautogui.press("Enter")
+    send_chat_message_by_message(message=f"-playback {playback_value}")
+    return None
+
+
+def set_sandbox_to_initial_state() -> None:
+    click_to_activate_game_window()
+    send_chat_message_by_message(message="-playback 1.0")
+    send_chat_message_by_message(message="-wave 1")
+    send_chat_message_by_message(message="-clear")
+    is_play_bnutton_in_view = sandbox_view.expect_play_button_to_be_in_view()
+    pyautogui.press("F1")
+    time.sleep(4)
+    if is_play_bnutton_in_view is True:
+        sandbox_view.play_button.click()
+    sandbox_view.playground_hover_area.select_region()
+    time.sleep(0.5)
+    pyautogui.press("Y")
+    send_chat_message_by_message(message="-wave 1")
+    send_chat_message_by_message(message="-clear")
+    send_chat_message_by_message(message="-heal")
+    set_initial_sandbox_view_position()
     return None
 
 
@@ -82,7 +108,7 @@ def make_screenshot_of_event_text() -> Path:
     return path
 
 
-def place_towers_and_wait_until_leak(
+def place_towers_and_wait_until_leak_ocr(
     tower_position: int, tower_amount: int
 ) -> list[str]:
     place_towers_by_tower_position_and_tower_amount(
@@ -113,6 +139,28 @@ def place_towers_and_wait_until_leak(
     sandbox_view.pause_button.click()
 
     return filtered_results
+
+
+def place_towers_and_wait_until_leak_hp_bar(
+    tower_position: int, tower_amount: int
+) -> list[str]:
+    place_towers_by_tower_position_and_tower_amount(
+        tower_position=tower_position, tower_amount=tower_amount
+    )
+    set_game_playback_by_playback_value()
+    sandbox_view.start_button.click()
+
+    time.sleep(1)
+    is_full_hp = True
+    while is_full_hp is True:
+        time.sleep(0.5)
+        logging.info("Hp bar is full")
+        is_full_hp = sandbox_view.expect_full_hp_bar_to_be_in_view()
+
+    logging.info("Leak happened")
+    sandbox_view.pause_button.click()
+
+    return None
 
 
 def check_wave_indicator() -> bool:

@@ -292,6 +292,13 @@ class SandboxView(BaseModel):
     shop_towers_buttons: ShopTowersButtons = ShopTowersButtons()
     grid: list[list[ActionableElement]] = grid
 
+    playground_hover_area: ActionableElement = ActionableElement(
+        rectangle=Rectangle(
+            tl=Point(x=392, y=266),
+            br=Point(x=1540, y=950),
+        ),
+    )
+
     def expect_ready_button_to_be_in_view(self) -> bool:
         return expect_to_be_in_view(
             haystack_path=self.dynamic_screenshot, needle=self.ready_button
@@ -300,6 +307,16 @@ class SandboxView(BaseModel):
     def expect_wave_phase_indicator_to_be_in_view(self) -> bool:
         return expect_to_be_in_view_region_area(
             haystack_path=self.dynamic_screenshot, needle=self.wave_phase_indicator
+        )
+
+    def expect_play_button_to_be_in_view(self) -> bool:
+        return expect_to_be_in_view_region_area(
+            haystack_path=self.dynamic_screenshot, needle=self.play_button
+        )
+
+    def expect_full_hp_bar_to_be_in_view(self) -> bool:
+        return expect_to_be_in_view_region_area(
+            haystack_path=self.dynamic_screenshot, needle=self.full_hp_bar
         )
 
     def add_shop_towers_buttons_markers(
