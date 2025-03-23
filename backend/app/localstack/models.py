@@ -46,3 +46,12 @@ class ActionableElement(BaseModel):
         if is_second_display:
             x = x + 1920
         pyautogui.click(x, y)
+
+    def select_region(self, is_second_display: bool = True):
+        tl_x, tl_y, br_x, br_y = self.rectangle.region
+        if is_second_display:
+            tl_x = tl_x + 1920
+            br_x = br_x + 1920
+        pyautogui.mouseDown(tl_x, tl_y)
+        pyautogui.moveTo(br_x, br_y)
+        pyautogui.mouseUp()
