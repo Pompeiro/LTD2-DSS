@@ -42,7 +42,7 @@ class ActionableElement(BaseModel):
     is_occupied: bool = False
 
     def click(self, is_second_display: bool = True):
-        x, y = self.center
+        x, y = self.rectangle.center.dict().values()
         if is_second_display:
             x = x + 1920
         pyautogui.click(x, y)

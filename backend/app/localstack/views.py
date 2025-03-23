@@ -33,11 +33,18 @@ def expect_to_be_in_view(
         haystack_path=haystack_path, needle_path=needle.image_path
     )
     x, y = center
-    needle_x, needle_y = needle.center
-    fit_x = needle_x - threshold <= x < needle_x + threshold
-    fit_y = needle_y - threshold <= y < needle_y + threshold
+    fit_x = (
+        needle.rectangle.center.x - threshold
+        <= x
+        < needle.rectangle.center.x + threshold
+    )
+    fit_y = (
+        needle.rectangle.center.y - threshold
+        <= y
+        < needle.rectangle.center.y + threshold
+    )
     result = fit_x and fit_y
-    logging.info("Current needle: %s", needle.image_path.stem)
+
     logging.info("Is needle in view?: %s", result)
     return result
 
@@ -46,7 +53,7 @@ def expect_to_be_in_view_region_area(
     haystack_path: Path, needle: ActionableElement
 ) -> bool:
     make_screenshot_by_given_region_and_display(
-        region=needle.tl + needle.br_relative_to_tl, display=2, path=haystack_path
+        region=needle.rectangle.region_relative, display=2, path=haystack_path
     )
     result = match_template_threshold(
         haystack_path=haystack_path, needle_path=needle.image_path
@@ -58,42 +65,27 @@ def expect_to_be_in_view_region_area(
 
 class MainMenuNavigationButtons(BaseModel):
     multiplayer: ActionableElement = ActionableElement(
+        rectangle=Rectangle(
+            tl=Point(x=75, y=242),
+            br=Point(x=446, y=296),
+        ),
         image_path=STATIC_IMAGES_MAIN_MENU_DIR.joinpath("multiplayer_button.png"),
-        center=(261, 268),
     )
+
     solo: ActionableElement = ActionableElement(
+        rectangle=Rectangle(
+            tl=Point(x=78, y=322),
+            br=Point(x=456, y=376),
+        ),
         image_path=STATIC_IMAGES_MAIN_MENU_DIR.joinpath("solo_button.png"),
-        center=(263, 344),
     )
+
     learn: ActionableElement = ActionableElement(
+        rectangle=Rectangle(
+            tl=Point(x=78, y=394),
+            br=Point(x=190, y=430),
+        ),
         image_path=STATIC_IMAGES_MAIN_MENU_DIR.joinpath("learn_button.png"),
-        center=(131, 412),
-    )
-    profile: ActionableElement = ActionableElement(
-        image_path=STATIC_IMAGES_MAIN_MENU_DIR.joinpath("profile_button.png"),
-        center=(146, 464),
-    )
-    leaderboards: ActionableElement = ActionableElement(
-        image_path=STATIC_IMAGES_MAIN_MENU_DIR.joinpath("leaderboards_button.png"),
-        center=(214, 514),
-    )
-    shop: ActionableElement = ActionableElement(
-        image_path=STATIC_IMAGES_MAIN_MENU_DIR.joinpath("shop_button.png"),
-        center=(122, 568),
-    )
-    guild: ActionableElement = ActionableElement(
-        image_path=STATIC_IMAGES_MAIN_MENU_DIR.joinpath("guild_button.png"),
-        center=(129, 621),
-    )
-
-    quit_: ActionableElement = ActionableElement(
-        image_path=STATIC_IMAGES_MAIN_MENU_DIR.joinpath("quit_button.png"),
-        center=(36, 1059),
-    )
-
-    bottom_buttons: ActionableElement = ActionableElement(
-        image_path=STATIC_IMAGES_MAIN_MENU_DIR.joinpath("bottom_buttons.png"),
-        center=(203, 1058),
     )
 
 
@@ -113,58 +105,20 @@ class MainMenuView(BaseModel):
 main_menu_view = MainMenuView()
 
 
-class SoloViewNavigationButtons(BaseModel):
-    campaign: ActionableElement = ActionableElement(
-        image_path=STATIC_IMAGES_SOLO_DIR.joinpath("campaign_button.png"),
-        center=(672, 688),
-    )
-    ai: ActionableElement = ActionableElement(
-        image_path=STATIC_IMAGES_SOLO_DIR.joinpath("ai_button.png"), center=(960, 688)
-    )
-    weekly_challenge: ActionableElement = ActionableElement(
-        image_path=STATIC_IMAGES_SOLO_DIR.joinpath("weekly_challenge_button.png"),
-        center=(1245, 690),
-    )
-    back: ActionableElement = ActionableElement(
-        image_path=STATIC_IMAGES_SOLO_DIR.joinpath("back_to_main_menu_button.png"),
-        center=(1794, 995),
-    )
-
-
-class SoloView(BaseModel):
-    static_screenshot: Path = Path(f"{STATIC_IMAGES_SOLO_DIR}/solo.png")
-    dynamic_screenshot: Path = Path(f"{STATIC_IMAGES_SOLO_DIR}/solo_dynamic.png")
-    navigation_buttons: SoloViewNavigationButtons = SoloViewNavigationButtons()
-
-    def expect_to_be_in_view(self) -> bool:
-        return expect_to_be_in_view(
-            haystack_path=self.dynamic_screenshot, needle=self.navigation_buttons.ai
-        )
-
-
-solo_view = SoloView()
-
-
 class LearnViewNavigationButtons(BaseModel):
-    tutorial: ActionableElement = ActionableElement(
-        image_path=STATIC_IMAGES_LEARN_DIR.joinpath("tutorial_button.png"),
-        center=(531, 699),
-    )
-    top_games: ActionableElement = ActionableElement(
-        image_path=STATIC_IMAGES_LEARN_DIR.joinpath("top_games_button.png"),
-        center=(815, 680),
-    )
-    codex: ActionableElement = ActionableElement(
-        image_path=STATIC_IMAGES_LEARN_DIR.joinpath("codex_button.png"),
-        center=(1103, 689),
-    )
     sandbox: ActionableElement = ActionableElement(
+        rectangle=Rectangle(
+            tl=Point(x=1338, y=680),
+            br=Point(x=1444, y=700),
+        ),
         image_path=STATIC_IMAGES_LEARN_DIR.joinpath("sandbox_button.png"),
-        center=(1391, 690),
     )
     back: ActionableElement = ActionableElement(
+        rectangle=Rectangle(
+            tl=Point(x=1760, y=984),
+            br=Point(x=1828, y=1010),
+        ),
         image_path=STATIC_IMAGES_LEARN_DIR.joinpath("back_to_main_menu_button.png"),
-        center=(1794, 997),
     )
 
 
@@ -185,40 +139,11 @@ learn_view = LearnView()
 
 class ChooseLegionViewNavigationButtons(BaseModel):
     element: ActionableElement = ActionableElement(
+        rectangle=Rectangle(
+            tl=Point(x=480, y=426),
+            br=Point(x=580, y=444),
+        ),
         image_path=STATIC_IMAGES_CHOOSE_LEGION_DIR.joinpath("element_button.png"),
-        center=(530, 434),
-    )
-    forsaken: ActionableElement = ActionableElement(
-        image_path=STATIC_IMAGES_CHOOSE_LEGION_DIR.joinpath("forsaken_button.png"),
-        center=(815, 435),
-    )
-    grove: ActionableElement = ActionableElement(
-        image_path=STATIC_IMAGES_CHOOSE_LEGION_DIR.joinpath("grove_button.png"),
-        center=(1103, 434),
-    )
-    mech: ActionableElement = ActionableElement(
-        image_path=STATIC_IMAGES_CHOOSE_LEGION_DIR.joinpath("mech_button.png"),
-        center=(1389, 434),
-    )
-    atlantean: ActionableElement = ActionableElement(
-        image_path=STATIC_IMAGES_CHOOSE_LEGION_DIR.joinpath("atlantean_button.png"),
-        center=(530, 800),
-    )
-    nomad: ActionableElement = ActionableElement(
-        image_path=STATIC_IMAGES_CHOOSE_LEGION_DIR.joinpath("nomad_button.png"),
-        center=(815, 799),
-    )
-    shrine: ActionableElement = ActionableElement(
-        image_path=STATIC_IMAGES_CHOOSE_LEGION_DIR.joinpath("shrine_button.png"),
-        center=(1103, 799),
-    )
-    divine: ActionableElement = ActionableElement(
-        image_path=STATIC_IMAGES_CHOOSE_LEGION_DIR.joinpath("divine_button.png"),
-        center=(1389, 801),
-    )
-    mastermind: ActionableElement = ActionableElement(
-        image_path=STATIC_IMAGES_CHOOSE_LEGION_DIR.joinpath("mastermind_button.png"),
-        center=(994, 958),
     )
 
 
@@ -236,7 +161,7 @@ class ChooseLegionView(BaseModel):
     def expect_to_be_in_view(self) -> bool:
         return expect_to_be_in_view(
             haystack_path=self.dynamic_screenshot,
-            needle=self.navigation_buttons.mastermind,
+            needle=self.navigation_buttons.element,
         )
 
 
@@ -305,47 +230,67 @@ class SandboxView(BaseModel):
     dynamic_screenshot: Path = Path(f"{STATIC_IMAGES_SANDBOX_DIR}/sandbox_dynamic.png")
     event_text_screenshot: Path = Path(f"{STATIC_IMAGES_SANDBOX_DIR}/event_text.png")
     ready_button: ActionableElement = ActionableElement(
+        rectangle=Rectangle(
+            tl=Point(x=922, y=180),
+            br=Point(x=964, y=196),
+        ),
         image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("ready_button.png"),
-        center=(959, 186),
     )
+
     start_button: ActionableElement = ActionableElement(
+        rectangle=Rectangle(
+            tl=Point(x=696, y=28),
+            br=Point(x=726, y=42),
+        ),
         image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("start_button.png"),
-        center=(710, 36),
-    )
-    pause_button: ActionableElement = ActionableElement(
-        image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("pause_button.png"),
-        center=(961, 134),
-    )
-    play_button: ActionableElement = ActionableElement(
-        image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("play_button.png"),
-        center=(961, 133),
     )
     clear_button: ActionableElement = ActionableElement(
+        rectangle=Rectangle(
+            tl=Point(x=746, y=28),
+            br=Point(x=780, y=42),
+        ),
         image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("clear_button.png"),
-        center=(762, 36),
     )
-    upgrade_king_menu_button: ActionableElement = ActionableElement(
-        image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("upgrade_king_menu_button.png"),
-        center=(549, 1009),
+
+    pause_button: ActionableElement = ActionableElement(
+        rectangle=Rectangle(
+            tl=Point(x=950, y=126),
+            br=Point(x=972, y=144),
+        ),
+        image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("pause_button.png"),
     )
+
+    play_button: ActionableElement = ActionableElement(
+        rectangle=Rectangle(
+            tl=Point(x=950, y=126),
+            br=Point(x=972, y=146),
+        ),
+        image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("play_button.png"),
+    )
+    full_hp_bar: ActionableElement = ActionableElement(
+        rectangle=Rectangle(
+            tl=Point(x=748, y=70),
+            br=Point(x=876, y=98),
+        ),
+        image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("full_hp_bar.png"),
+    )
+
     wave_phase_indicator: ActionableElement = ActionableElement(
         rectangle=Rectangle(tl=Point(x=954, y=105), br=Point(x=970, y=121)),
         image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("wave_phase_indicator.png"),
     )
 
-    event_history_text: ActionableElement = ActionableElement(
-        image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("event_history_text.png"),
-        center=(1004, 344),
+    event_history_log: ActionableElement = ActionableElement(
+        rectangle=Rectangle(tl=Point(x=950, y=332), br=Point(x=1290, y=912)),
+        image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("event_history_log.png"),
     )
-    event_history_coordinates: Rectangle = Rectangle(
-        tl=Point(x=950, y=332), br=Point(x=1290, y=912)
-    )
-    event_coordinates: Rectangle = Rectangle(
-        tl=Point(x=64, y=380), br=Point(x=382, y=778)
+    event_text: ActionableElement = ActionableElement(
+        rectangle=Rectangle(tl=Point(x=64, y=380), br=Point(x=382, y=580)),
+        image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("event_text.png"),
     )
 
     shop_towers_buttons: ShopTowersButtons = ShopTowersButtons()
-    grid: list[list[Rectangle]] = grid
+    grid: list[list[ActionableElement]] = grid
 
     def expect_ready_button_to_be_in_view(self) -> bool:
         return expect_to_be_in_view(
