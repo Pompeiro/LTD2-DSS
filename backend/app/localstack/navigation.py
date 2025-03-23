@@ -8,7 +8,6 @@ from app.localstack.views import (
     choose_legion_view,
     learn_view,
     main_menu_view,
-    solo_view,
 )
 
 IMAGES_DIR = "app/images"
@@ -18,14 +17,6 @@ STATIC_IMAGES_SOLO_DIR: Path = Path(f"{STATIC_IMAGES_DIR}/solo")
 STATIC_IMAGES_LEARN_DIR: Path = Path(f"{STATIC_IMAGES_DIR}/learn")
 STATIC_IMAGES_CHOOSE_LEGION_DIR: Path = Path(f"{STATIC_IMAGES_DIR}/choose_legion")
 STATIC_IMAGES_SANDBOX_DIR: Path = Path(f"{STATIC_IMAGES_DIR}/sandbox")
-
-
-def navigate_from_main_to_solo_view() -> bool:
-    if main_menu_view.expect_to_be_in_view() is True:
-        main_menu_view.navigation_buttons.solo.click()
-        time.sleep(1)
-        return solo_view.expect_to_be_in_view()
-    return False
 
 
 def navigate_from_main_to_learn_view() -> bool:

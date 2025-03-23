@@ -61,7 +61,7 @@ def make_screenshot_of_event_history_log() -> Path:
     pyautogui.press("winleft")
 
     path = make_screenshot_by_given_region_and_display(
-        region=sandbox_view.event_history_coordinates.region_relative,
+        region=sandbox_view.event_history_log.rectangle.region_relative,
         display=2,
         path=STATIC_IMAGES_SANDBOX_DIR.joinpath("event_history_log.png"),
     )
@@ -74,9 +74,9 @@ def make_screenshot_of_event_history_log() -> Path:
 def make_screenshot_of_event_text() -> Path:
     pyautogui.press("F2")
     path = make_screenshot_by_given_region_and_display(
-        region=sandbox_view.event_coordinates.region_relative,
+        region=sandbox_view.event_text.rectangle.region_relative,
         display=2,
-        path=sandbox_view.event_text_screenshot,
+        path=sandbox_view.event_text.image_path,
     )
 
     return path

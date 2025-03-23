@@ -5,9 +5,7 @@ from app.localstack.navigation import (
     navigate_from_learn_to_choose_legion_view,
     navigate_from_main_to_learn_view,
 )
-from app.localstack.sandbox_actions import (
-    place_towers_and_wait_until_leak,
-)
+from app.localstack.sandbox_actions import place_towers_and_wait_until_leak
 from app.localstack.views import sandbox_view
 
 
