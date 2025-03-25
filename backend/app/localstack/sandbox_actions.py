@@ -143,13 +143,17 @@ def place_towers_and_wait_until_leak_ocr(
     return filtered_results
 
 
+def extract_numbers(text: str) -> str:
+    return "".join(filter(str.isdigit, text))
+
+
 def place_towers_and_wait_until_leak_hp_bar(
     tower_position: int, tower_amount: int
-) -> list[str]:
+) -> int:
     place_towers_by_tower_position_and_tower_amount(
         tower_position=tower_position, tower_amount=tower_amount
     )
-    set_game_playback_by_playback_value()
+    set_game_playback_by_playback_value(playback_value=7)
     sandbox_view.start_button.click()
 
     time.sleep(1)
@@ -161,20 +165,37 @@ def place_towers_and_wait_until_leak_hp_bar(
 
     wave_status = True
     while wave_status is True:
-        time.sleep(0.1)
         logging.info("This is still wave phase")
         wave_status = sandbox_view.expect_wave_phase_indicator_to_be_in_view()
 
     path = make_screenshot_of_wave_until_text()
     text = ocr_by_path(path=path, filter_word="W")
     logging.info("Leak happened, waiting for %s", text)
-    wait_until_text_splitted = text[0].split(" ")
-    if len(wait_until_text_splitted) == 2:
-        leak_wave = wait_until_text_splitted[1]
-        logging.info("Wave that leak happened: %d", int(leak_wave) - 1)
+    wait_until_text_splitted = text[0]
+    leak_wave = int(extract_numbers(wait_until_text_splitted))
+    logging.info("Wave that leak happened: %d", leak_wave - 1)
     sandbox_view.pause_button.click()
 
-    return None
+    return leak_wave
+
+
+def find_tower_amount_to_hold_until_given_leak_wave(
+    tower_position: int, leak_wave: int
+) -> int:
+    current_leak_wave = 0
+    tower_amount = 1
+    while current_leak_wave < leak_wave:
+        set_initial_sandbox_view_position()
+        current_leak_wave = place_towers_and_wait_until_leak_hp_bar(
+            tower_position=tower_position, tower_amount=tower_amount
+        )
+        set_sandbox_to_initial_state()
+        tower_amount = tower_amount + 1
+        logging.info("current_leak_wave is: %s", current_leak_wave)
+        logging.info("leak_wave is: %s", leak_wave)
+        logging.info("current_leak_wave < leak_wave %s", current_leak_wave < leak_wave)
+
+    return tower_amount - 1
 
 
 def check_wave_indicator() -> bool:
