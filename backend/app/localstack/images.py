@@ -7,6 +7,7 @@ import pyautogui
 import pytesseract
 
 from app.enums import ArenaGrid, ShopGrid
+from app.localstack.models import ActionableElement
 from app.playground_area_coordinates import grid
 
 IMAGES_DIR: str = "app/images"
@@ -32,6 +33,16 @@ def make_screenshot_by_given_display(
     cv_screenshot = cv.cvtColor(np.array(screenshot), cv.COLOR_RGB2BGR)
 
     cv.imwrite(filename=str(path), img=cv_screenshot)
+    return path
+
+
+def make_region_screenshot_by_actionable_element(actionable_element: ActionableElement) -> Path:
+    path = make_screenshot_by_given_region_and_display(
+        region=actionable_element.rectangle.region_relative,
+        display=2,
+        path=actionable_element.image_path,
+    )
+
     return path
 
 
@@ -160,14 +171,15 @@ def add_playground_grid_with_perspective(
     return image_result_path
 
 
-def ocr_by_path(path: Path = EVENT_HISTORY_LOG_PATH) -> list[str]:
+def ocr_by_path(path: Path = EVENT_HISTORY_LOG_PATH, filter_word: str="") -> list[str]:
+    config = r'--oem 3 --psm 6'
     img_cv = cv.imread(str(path))
     img_rgb = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
 
-    result = pytesseract.image_to_string(img_rgb)
+    result = pytesseract.image_to_string(img_rgb, config=config)
 
     results = result.split("\n")
-    filtered_results = list(filter(lambda x: "leak" in x, results))
+    filtered_results = list(filter(lambda x: filter_word in x, results))
 
     return filtered_results
 
