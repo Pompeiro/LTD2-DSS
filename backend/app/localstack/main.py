@@ -6,9 +6,7 @@ from app.localstack.navigation import (
     navigate_from_main_to_learn_view,
 )
 from app.localstack.sandbox_actions import (
-    place_towers_and_wait_until_leak_hp_bar,
-    set_initial_sandbox_view_position,
-    set_sandbox_to_initial_state,
+    find_tower_amount_to_hold_until_given_leak_wave,
 )
 
 
@@ -29,9 +27,7 @@ def main():
     # import ipdb
     # ipdb.set_trace()
     navigate_from_main_to_sandbox()
-    set_initial_sandbox_view_position()
-    place_towers_and_wait_until_leak_hp_bar(1, 30)
-    set_sandbox_to_initial_state()
+    find_tower_amount_to_hold_until_given_leak_wave(tower_position=5, leak_wave=8)
     import ipdb
 
     ipdb.set_trace()
