@@ -5,7 +5,7 @@ from pathlib import Path
 import pyautogui
 
 from app.localstack.images import (
-    make_screenshot_by_given_region_and_display,
+    make_region_screenshot_by_actionable_element,
     ocr_by_path,
 )
 from app.localstack.views import sandbox_view
@@ -86,10 +86,8 @@ def make_screenshot_of_event_history_log() -> Path:
     pyautogui.keyDown("tab")
     pyautogui.press("winleft")
 
-    path = make_screenshot_by_given_region_and_display(
-        region=sandbox_view.event_history_log.rectangle.region_relative,
-        display=2,
-        path=STATIC_IMAGES_SANDBOX_DIR.joinpath("event_history_log.png"),
+    path = make_region_screenshot_by_actionable_element(
+        actionable_element=sandbox_view.event_history_log
     )
 
     pyautogui.keyUp("tab")
@@ -99,12 +97,16 @@ def make_screenshot_of_event_history_log() -> Path:
 
 def make_screenshot_of_event_text() -> Path:
     pyautogui.press("F2")
-    path = make_screenshot_by_given_region_and_display(
-        region=sandbox_view.event_text.rectangle.region_relative,
-        display=2,
-        path=sandbox_view.event_text.image_path,
+    path = make_region_screenshot_by_actionable_element(
+        actionable_element=sandbox_view.event_text
     )
+    return path
 
+
+def make_screenshot_of_wave_until_text() -> Path:
+    path = make_region_screenshot_by_actionable_element(
+        actionable_element=sandbox_view.until_wave_text
+    )
     return path
 
 
@@ -157,7 +159,19 @@ def place_towers_and_wait_until_leak_hp_bar(
         logging.info("Hp bar is full")
         is_full_hp = sandbox_view.expect_full_hp_bar_to_be_in_view()
 
-    logging.info("Leak happened")
+    wave_status = True
+    while wave_status is True:
+        time.sleep(0.1)
+        logging.info("This is still wave phase")
+        wave_status = sandbox_view.expect_wave_phase_indicator_to_be_in_view()
+
+    path = make_screenshot_of_wave_until_text()
+    text = ocr_by_path(path=path, filter_word="W")
+    logging.info("Leak happened, waiting for %s", text)
+    wait_until_text_splitted = text[0].split(" ")
+    if len(wait_until_text_splitted) == 2:
+        leak_wave = wait_until_text_splitted[1]
+        logging.info("Wave that leak happened: %d", int(leak_wave) - 1)
     sandbox_view.pause_button.click()
 
     return None

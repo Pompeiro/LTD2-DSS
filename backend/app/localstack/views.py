@@ -288,7 +288,10 @@ class SandboxView(BaseModel):
         rectangle=Rectangle(tl=Point(x=64, y=380), br=Point(x=382, y=580)),
         image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("event_text.png"),
     )
-
+    until_wave_text: ActionableElement = ActionableElement(
+        rectangle=Rectangle(tl=Point(x=950, y=104), br=Point(x=1012, y=120)),
+        image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("until_wave_text.png"),
+    )
     shop_towers_buttons: ShopTowersButtons = ShopTowersButtons()
     grid: list[list[ActionableElement]] = grid
 
