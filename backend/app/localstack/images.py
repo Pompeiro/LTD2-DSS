@@ -36,7 +36,9 @@ def make_screenshot_by_given_display(
     return path
 
 
-def make_region_screenshot_by_actionable_element(actionable_element: ActionableElement) -> Path:
+def make_region_screenshot_by_actionable_element(
+    actionable_element: ActionableElement,
+) -> Path:
     path = make_screenshot_by_given_region_and_display(
         region=actionable_element.rectangle.region_relative,
         display=2,
@@ -171,8 +173,10 @@ def add_playground_grid_with_perspective(
     return image_result_path
 
 
-def ocr_by_path(path: Path = EVENT_HISTORY_LOG_PATH, filter_word: str="") -> list[str]:
-    config = r'--oem 3 --psm 6'
+def ocr_by_path(
+    path: Path = EVENT_HISTORY_LOG_PATH, filter_word: str = ""
+) -> list[str]:
+    config = r"--oem 3 --psm 6"
     img_cv = cv.imread(str(path))
     img_rgb = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
 

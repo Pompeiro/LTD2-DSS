@@ -5,9 +5,8 @@ from pathlib import Path
 import pyautogui
 
 from app.localstack.images import (
-    make_screenshot_by_given_region_and_display,
+    make_region_screenshot_by_actionable_element,
     ocr_by_path,
-make_region_screenshot_by_actionable_element
 )
 from app.localstack.views import sandbox_view
 
@@ -87,7 +86,9 @@ def make_screenshot_of_event_history_log() -> Path:
     pyautogui.keyDown("tab")
     pyautogui.press("winleft")
 
-    path = make_region_screenshot_by_actionable_element(actionable_element=sandbox_view.event_history_log)
+    path = make_region_screenshot_by_actionable_element(
+        actionable_element=sandbox_view.event_history_log
+    )
 
     pyautogui.keyUp("tab")
 
@@ -96,13 +97,18 @@ def make_screenshot_of_event_history_log() -> Path:
 
 def make_screenshot_of_event_text() -> Path:
     pyautogui.press("F2")
-    path = make_region_screenshot_by_actionable_element(actionable_element=sandbox_view.event_text)
+    path = make_region_screenshot_by_actionable_element(
+        actionable_element=sandbox_view.event_text
+    )
     return path
 
 
 def make_screenshot_of_wave_until_text() -> Path:
-    path = make_region_screenshot_by_actionable_element(actionable_element=sandbox_view.until_wave_text)
+    path = make_region_screenshot_by_actionable_element(
+        actionable_element=sandbox_view.until_wave_text
+    )
     return path
+
 
 def place_towers_and_wait_until_leak_ocr(
     tower_position: int, tower_amount: int
