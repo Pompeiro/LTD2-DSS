@@ -46,6 +46,45 @@ def place_towers_by_tower_position_and_tower_amount(
                 break
 
 
+def place_towers_on_columns_by_tower_position_and_tower_amount(
+    tower_position: int, tower_amount: int
+) -> None:
+    click_to_activate_game_window()
+    placed_towers_counter = 0
+    transposed_grid = list(zip(*sandbox_view.grid))
+    for row in transposed_grid:
+        if placed_towers_counter == tower_amount:
+            break
+        for column in row:
+            sandbox_view.shop_towers_buttons.towers[tower_position].click()
+            column.click()
+            column.click()
+            placed_towers_counter = placed_towers_counter + 1
+            if placed_towers_counter == tower_amount:
+                break
+
+
+def place_towers_on_opposite_columns_by_tower_position_and_tower_amount(
+    tower_position: int, tower_amount: int
+) -> None:
+    click_to_activate_game_window()
+    placed_towers_counter = 0
+    transposed_grid = list(zip(*sandbox_view.grid))
+    for row in transposed_grid:
+        if placed_towers_counter == tower_amount:
+            break
+        for i in range(0,len(row)):
+            column = transposed_grid[-1][i]
+            if i % 2 == 0:
+                column = transposed_grid[0][i]
+
+            sandbox_view.shop_towers_buttons.towers[tower_position].click()
+            column.click()
+            column.click()
+            placed_towers_counter = placed_towers_counter + 1
+            if placed_towers_counter == tower_amount:
+                break
+
 def send_chat_message_by_message(message: str) -> None:
     pyautogui.press("Enter")
     time.sleep(0.05)
