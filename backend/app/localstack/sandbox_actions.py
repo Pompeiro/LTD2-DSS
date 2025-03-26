@@ -51,7 +51,7 @@ def place_towers_on_columns_by_tower_position_and_tower_amount(
 ) -> None:
     click_to_activate_game_window()
     placed_towers_counter = 0
-    transposed_grid = list(zip(*sandbox_view.grid))
+    transposed_grid = list(zip(*sandbox_view.grid, strict=False))
     for row in transposed_grid:
         if placed_towers_counter == tower_amount:
             break
@@ -69,14 +69,15 @@ def place_towers_on_opposite_columns_by_tower_position_and_tower_amount(
 ) -> None:
     click_to_activate_game_window()
     placed_towers_counter = 0
-    transposed_grid = list(zip(*sandbox_view.grid))
-    for row in transposed_grid:
+    transposed_grid = list(zip(*sandbox_view.grid, strict=False))
+    for i, row in enumerate(transposed_grid):
         if placed_towers_counter == tower_amount:
             break
-        for i in range(0,len(row)):
-            column = transposed_grid[-1][i]
-            if i % 2 == 0:
-                column = transposed_grid[0][i]
+        for j in range(0, len(row) * 2):
+            board_row = j // 2
+            column = transposed_grid[-1 * (i + 1)][board_row]
+            if j % 2 == 0:
+                column = transposed_grid[i][board_row]
 
             sandbox_view.shop_towers_buttons.towers[tower_position].click()
             column.click()
@@ -84,6 +85,7 @@ def place_towers_on_opposite_columns_by_tower_position_and_tower_amount(
             placed_towers_counter = placed_towers_counter + 1
             if placed_towers_counter == tower_amount:
                 break
+
 
 def send_chat_message_by_message(message: str) -> None:
     pyautogui.press("Enter")
@@ -102,7 +104,7 @@ def set_game_playback_by_playback_value(playback_value: float = 10.0) -> None:
 def set_sandbox_to_initial_state() -> None:
     click_to_activate_game_window()
     send_chat_message_by_message(message="-playback 1.0")
-    send_chat_message_by_message(message="-wave 1")
+    send_chat_message_by_message(message="-wave 0")
     send_chat_message_by_message(message="-clear")
     is_play_bnutton_in_view = sandbox_view.expect_play_button_to_be_in_view()
     pyautogui.press("F1")
@@ -189,7 +191,7 @@ def extract_numbers(text: str) -> str:
 def place_towers_and_wait_until_leak_hp_bar(
     tower_position: int, tower_amount: int
 ) -> int:
-    place_towers_by_tower_position_and_tower_amount(
+    place_towers_on_opposite_columns_by_tower_position_and_tower_amount(
         tower_position=tower_position, tower_amount=tower_amount
     )
     set_game_playback_by_playback_value(playback_value=7)
@@ -211,8 +213,8 @@ def place_towers_and_wait_until_leak_hp_bar(
     text = ocr_by_path(path=path, filter_word="W")
     logging.info("Leak happened, waiting for %s", text)
     wait_until_text_splitted = text[0]
-    leak_wave = int(extract_numbers(wait_until_text_splitted))
-    logging.info("Wave that leak happened: %d", leak_wave - 1)
+    leak_wave = int(extract_numbers(wait_until_text_splitted)) - 1
+    logging.info("Wave that leak happened: %d", leak_wave)
     sandbox_view.pause_button.click()
 
     return leak_wave

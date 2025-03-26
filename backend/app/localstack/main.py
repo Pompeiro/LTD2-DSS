@@ -7,10 +7,8 @@ from app.localstack.navigation import (
 )
 from app.localstack.sandbox_actions import (
     find_tower_amount_to_hold_until_given_leak_wave,
-place_towers_on_opposite_columns_by_tower_position_and_tower_amount
 )
 
-from app.localstack.views import sandbox_view
 
 def navigate_from_main_to_sandbox():
     navigate_from_main_to_learn_view()
@@ -22,17 +20,17 @@ logging.basicConfig(level=logging.INFO)
 
 
 def main():
-    f = sandbox_view.grid
-    place_towers_on_opposite_columns_by_tower_position_and_tower_amount(2,5)
-    import ipdb
-    ipdb.set_trace()
+    # f = sandbox_view
     # f.expect_ready_button_to_be_in_view()
     # path = make_screenshot_of_wave_until_text()
     # text = ocr_by_path(path=path)
     # import ipdb
     # ipdb.set_trace()
-    navigate_from_main_to_sandbox()
-    find_tower_amount_to_hold_until_given_leak_wave(tower_position=5, leak_wave=8)
+    # navigate_from_main_to_sandbox()
+    # set_initial_sandbox_view_position()
+    # place_towers_and_wait_until_leak_hp_bar(1, 30)
+    # set_sandbox_to_initial_state()
+    find_tower_amount_to_hold_until_given_leak_wave(tower_position=1, leak_wave=5)
     import ipdb
 
     ipdb.set_trace()
