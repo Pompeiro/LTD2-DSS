@@ -10,7 +10,7 @@ from app.localstack.images import (
     ocr_by_path,
     ocr_digits_by_path,
 )
-from app.localstack.models import ActionableElement
+from app.localstack.models import ActionableElement, GridTile
 from app.localstack.views import sandbox_view
 
 STATIC_IMAGES_SANDBOX_DIR = Path("app/images/static/sandbox")
@@ -150,6 +150,25 @@ def place_towers_on_opposite_columns_by_tower_position_and_tower_amount(
             placed_towers_counter = placed_towers_counter + 1
             if placed_towers_counter == tower_amount:
                 break
+
+
+def place_towers_on_opposite_columns_by_tower_name(tower_name: str) -> None:
+    click_to_activate_game_window()
+    transposed_grid: list[list[GridTile]] = list(zip(*sandbox_view.grid, strict=True))
+    tower_placed = False
+    for i, row in enumerate(transposed_grid):
+        for j in range(0, len(row) * 2):
+            board_row = j // 2
+            column = transposed_grid[-1 * (i + 1)][board_row]
+            if j % 2 == 0:
+                column = transposed_grid[i][board_row]
+            if column.unit_id is None:
+                column.place_tower_by_name(tower_to_place_name=tower_name)
+                tower_placed = True
+            if tower_placed is True:
+                break
+        if tower_placed is True:
+            break
 
 
 def send_chat_message_by_message(message: str) -> None:

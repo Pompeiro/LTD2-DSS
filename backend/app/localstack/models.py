@@ -37,6 +37,38 @@ class Rectangle(BaseModel):
         return (self.tl.x, self.tl.y, self.width, self.height)
 
 
+class GridTile(BaseModel):
+    rectangle: Rectangle
+    unit_id: str | None = None
+
+    def place_tower_by_name(
+        self,
+        tower_to_place_name: str,
+        current_shop_towers: tuple[str] = (
+            "proton",
+            "aqua_spirit",
+            "windhawk",
+            "mudman",
+            "disciple",
+            "fire_lord",
+        ),
+        is_second_display: bool = True,
+    ) -> None:
+        hotkeys: list[str] = ["q", "w", "e", "r", "t", "y"]
+        current_shop_tower_to_hotkey_map = dict(
+            zip(current_shop_towers, hotkeys, strict=False)
+        )
+        pyautogui.press(current_shop_tower_to_hotkey_map.get(tower_to_place_name))
+
+        x, y = self.rectangle.center.dict().values()
+        if is_second_display:
+            x = x + 1920
+        pyautogui.click(x, y)
+        pyautogui.click(x, y)
+
+        self.unit_id = f"{tower_to_place_name}_unit_id"
+
+
 class ActionableElement(BaseModel):
     rectangle: Rectangle
     image_path: Path | None = None
