@@ -293,13 +293,12 @@ class SandboxView(BaseModel):
         image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("until_wave_text.png"),
     )
 
-
     current_gold_text: ActionableElement = ActionableElement(
-        rectangle=Rectangle(tl=Point(x=1216, y=972), br=Point(x=1256, y=986)),
+        rectangle=Rectangle(tl=Point(x=1216, y=970), br=Point(x=1256, y=988)),
         image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("current_gold_text.png"),
     )
     current_income_text: ActionableElement = ActionableElement(
-        rectangle=Rectangle(tl=Point(x=1300, y=970), br=Point(x=1316, y=990)),
+        rectangle=Rectangle(tl=Point(x=1300, y=970), br=Point(x=1336, y=990)),
         image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("current_income_text.png"),
     )
     current_mythium_text: ActionableElement = ActionableElement(
@@ -307,14 +306,13 @@ class SandboxView(BaseModel):
         image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("current_mythium_text.png"),
     )
     current_workers_text: ActionableElement = ActionableElement(
-        rectangle=Rectangle(tl=Point(x=1300, y=994), br=Point(x=1316, y=1010)),
+        rectangle=Rectangle(tl=Point(x=1300, y=990), br=Point(x=1326, y=1012)),
         image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("current_workers_text.png"),
     )
     current_fighter_value_text: ActionableElement = ActionableElement(
         rectangle=Rectangle(tl=Point(x=1234, y=1016), br=Point(x=1274, y=1032)),
         image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("current_fighter_value_text.png"),
     )
-
 
     shop_towers_buttons: ShopTowersButtons = ShopTowersButtons()
     grid: list[list[ActionableElement]] = grid

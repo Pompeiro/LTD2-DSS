@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import cv2 as cv
 import pyautogui
 from pydantic import BaseModel, computed_field
 
@@ -55,3 +56,14 @@ class ActionableElement(BaseModel):
         pyautogui.mouseDown(tl_x, tl_y)
         pyautogui.moveTo(br_x, br_y)
         pyautogui.mouseUp()
+
+    def draw_rectangle(self):
+        cv.imwrite(
+            self.image_path,
+            cv.rectangle(
+                img=cv.imread(self.image_path),
+                pt1=(0, 0),
+                pt2=(self.rectangle.width - 1, self.rectangle.height - 1),
+                color=(255, 255, 255),
+            ),
+        )
