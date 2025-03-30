@@ -10,8 +10,9 @@ from app.localstack.images import (
     ocr_by_path,
     ocr_digits_by_path,
 )
-from app.localstack.models import ActionableElement, GridTile
+from app.localstack.models import ActionableElement, Grid
 from app.localstack.views import sandbox_view
+from app.playground_area_coordinates import grid
 
 STATIC_IMAGES_SANDBOX_DIR = Path("app/images/static/sandbox")
 
@@ -84,7 +85,7 @@ def click_to_activate_game_window() -> None:
 
 def fill_whole_grid_with_towers() -> None:
     click_to_activate_game_window()
-    for i, row in enumerate(sandbox_view.grid):
+    for i, row in enumerate(grid.grid):
         for column in row:
             if i == 7:
                 i = 6
@@ -99,7 +100,7 @@ def place_towers_by_tower_position_and_tower_amount(
 ) -> None:
     click_to_activate_game_window()
     placed_towers_counter = 0
-    for row in sandbox_view.grid:
+    for row in grid.grid:
         if placed_towers_counter == tower_amount:
             break
         for column in row:
@@ -116,7 +117,7 @@ def place_towers_on_columns_by_tower_position_and_tower_amount(
 ) -> None:
     click_to_activate_game_window()
     placed_towers_counter = 0
-    transposed_grid = list(zip(*sandbox_view.grid, strict=False))
+    transposed_grid = list(zip(*grid.grid, strict=False))
     for row in transposed_grid:
         if placed_towers_counter == tower_amount:
             break
@@ -134,7 +135,7 @@ def place_towers_on_opposite_columns_by_tower_position_and_tower_amount(
 ) -> None:
     click_to_activate_game_window()
     placed_towers_counter = 0
-    transposed_grid = list(zip(*sandbox_view.grid, strict=False))
+    transposed_grid = list(zip(*grid.grid, strict=False))
     for i, row in enumerate(transposed_grid):
         if placed_towers_counter == tower_amount:
             break
@@ -154,7 +155,7 @@ def place_towers_on_opposite_columns_by_tower_position_and_tower_amount(
 
 def place_towers_on_opposite_columns_by_tower_name(tower_name: str) -> None:
     click_to_activate_game_window()
-    transposed_grid: list[list[GridTile]] = list(zip(*sandbox_view.grid, strict=True))
+    transposed_grid: Grid = list(zip(*grid.grid, strict=True))
     tower_placed = False
     for i, row in enumerate(transposed_grid):
         for j in range(0, len(row) * 2):

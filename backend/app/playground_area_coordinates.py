@@ -1,4 +1,4 @@
-from app.localstack.models import GridTile, Point, Rectangle
+from app.localstack.models import Grid, GridTile, Point, Rectangle
 
 OFFSET = (718, 348)
 
@@ -489,4 +489,5 @@ row_7 = [
 ]
 
 
-grid = [row_1, row_2, row_3, row_4, row_5, row_6, row_7]
+_grid = [row_1, row_2, row_3, row_4, row_5, row_6, row_7]
+grid = Grid(grid=_grid)
