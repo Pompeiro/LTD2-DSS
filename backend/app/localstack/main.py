@@ -6,7 +6,10 @@ from app.localstack.navigation import (
     navigate_from_main_to_learn_view,
 )
 
+from app.localstack.views import sandbox_view
+from app.localstack.sandbox_actions import flow_based_on_stats, make_screenshot_of_wave_until_text, game_state
 
+from app.localstack.images import make_region_screenshot_by_actionable_element, ocr_digits_by_path
 def navigate_from_main_to_sandbox():
     navigate_from_main_to_learn_view()
     navigate_from_learn_to_choose_legion_view()
@@ -20,10 +23,17 @@ def main():
     # f = read_creatures()
     # g = read_creatures_by_stage(5)
     # gg = calculate_stage_stats(5)
+    #flow_based_on_stats(1,3)
+
+    f = game_state
+    f.update_whole_game_state()
+   
     import ipdb
 
     ipdb.set_trace()
-    # f = sandbox_view
+    f = sandbox_view
+
+    make_region_screenshot_by_actionable_element(actionable_element=f.current_gold_text)
     # f.expect_ready_button_to_be_in_view()
     # path = make_screenshot_of_wave_until_text()
     # text = ocr_by_path(path=path)

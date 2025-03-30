@@ -187,6 +187,19 @@ def ocr_by_path(
 
     return filtered_results
 
+def ocr_digits_by_path(
+    path: Path = EVENT_HISTORY_LOG_PATH
+) -> int:
+    config = r"-c tessedit_char_whitelist=0123456789 --oem 3 --psm 6"
+    img_cv = cv.imread(str(path))
+    img_rgb = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
+
+    result = pytesseract.image_to_string(img_rgb, config=config)
+    result_replaced = result.replace("\n", "")
+    import ipdb
+    ipdb.set_trace()
+
+    return int(result_replaced)
 
 def match_template_center(haystack_path: Path, needle_path: Path) -> tuple[int, int]:
     haystack_img = cv.imread(str(haystack_path), cv.COLOR_BGR2GRAY)

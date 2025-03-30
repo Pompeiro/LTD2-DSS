@@ -7,11 +7,60 @@ import pyautogui
 from app.localstack.images import (
     make_region_screenshot_by_actionable_element,
     ocr_by_path,
+    ocr_digits_by_path
 )
 from app.localstack.views import sandbox_view
-
+from pydantic import BaseModel
 STATIC_IMAGES_SANDBOX_DIR = Path("app/images/static/sandbox")
 
+class GameState(BaseModel):
+    current_gold: int = 0
+    current_income: int = 0
+    current_mythium: int = 0
+    current_workers: int = 0
+    current_fighter_value: int = 0
+
+    next_wave: int = 0
+
+    def update_current_gold(self) -> None:
+        path = make_region_screenshot_by_actionable_element(actionable_element=sandbox_view.current_gold_text)
+        digits = ocr_digits_by_path(path=path)
+        self.current_gold = digits
+
+    def update_current_income(self) -> None:
+        path = make_region_screenshot_by_actionable_element(actionable_element=sandbox_view.current_income_text)
+        digits = ocr_digits_by_path(path=path)
+        self.current_income = digits       
+
+    def update_current_mythium(self) -> None:
+        path = make_region_screenshot_by_actionable_element(actionable_element=sandbox_view.current_mythium_text)
+        digits = ocr_digits_by_path(path=path)
+        self.current_mythium = digits
+
+    def update_current_workers(self) -> None:
+        path = make_region_screenshot_by_actionable_element(actionable_element=sandbox_view.current_workers_text)
+        digits = ocr_digits_by_path(path=path)
+        self.current_workers = digits
+
+    def update_current_value(self) -> None:
+        path = make_region_screenshot_by_actionable_element(actionable_element=sandbox_view.current_fighter_value_text)
+        digits = ocr_digits_by_path(path=path)
+        self.current_value = digits
+
+    def update_next_wave(self) -> None:
+        path = make_region_screenshot_by_actionable_element(actionable_element=sandbox_view.until_wave_text)
+        digits = ocr_digits_by_path(path=path)
+        self.next_wave = digits
+
+    def update_whole_game_state(self) -> None:
+        #self.update_current_gold()
+        #self.update_current_income()
+        #self.update_current_mythium()
+        self.update_current_workers()
+        self.update_current_value()
+        self.update_next_wave()
+
+game_state = GameState()        
 
 def click_to_activate_game_window() -> None:
     pyautogui.click(x=1920 + 100, y=250)
@@ -238,6 +287,34 @@ def find_tower_amount_to_hold_until_given_leak_wave(
 
     return tower_amount - 1
 
+def flow_based_on_stats(
+    tower_position: int, tower_amount: int
+):
+    set_initial_sandbox_view_position()
+
+    place_towers_on_opposite_columns_by_tower_position_and_tower_amount(
+        tower_position=tower_position, tower_amount=tower_amount
+    )
+    set_game_playback_by_playback_value(playback_value=7)
+    sandbox_view.start_button.click()
+
+    wave_status = False
+    for i in range(5):
+        while wave_status is False:
+            wave_status = sandbox_view.expect_wave_phase_indicator_to_be_in_view()
+            logging.info("This is not wave phase")
+
+        while wave_status is True:
+            logging.info("This is still wave phase")
+            wave_status = sandbox_view.expect_wave_phase_indicator_to_be_in_view()
+
+        logging.info("wave phase finished")
+        sandbox_view.pause_button.click()
+        import ipdb
+        ipdb.set_trace()
+
+
+        sandbox_view.play_button.click()
 
 def check_wave_indicator() -> bool:
     return sandbox_view.expect_wave_phase_indicator_to_be_in_view()
