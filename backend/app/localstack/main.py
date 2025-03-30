@@ -9,7 +9,7 @@ from app.localstack.navigation import (
     navigate_from_main_to_learn_view,
 )
 from app.localstack.sandbox_actions import (
-    flow_based_on_stats,
+    place_towers_on_opposite_columns_by_tower_name,
 )
 from app.localstack.views import sandbox_view
 
@@ -27,8 +27,10 @@ def main():
     # f = read_creatures()
     # g = read_creatures_by_stage(5)
     # gg = calculate_stage_stats(5)
-    flow_based_on_stats(1, 3)
-
+    # flow_based_on_stats(1, 3)
+    # make_screenshot_by_given_display(2, f"app/images/my_screenshot.png")
+    # match_template()
+    place_towers_on_opposite_columns_by_tower_name(tower_name="fire_lord")
     import ipdb
 
     ipdb.set_trace()
