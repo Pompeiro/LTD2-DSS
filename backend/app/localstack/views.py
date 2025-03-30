@@ -12,8 +12,7 @@ from app.localstack.images import (
     match_template_center,
     match_template_threshold,
 )
-from app.localstack.models import ActionableElement, GridTile, Point, Rectangle
-from app.playground_area_coordinates import grid
+from app.localstack.models import ActionableElement, Point, Rectangle
 
 IMAGES_DIR = "app/images"
 STATIC_IMAGES_DIR = "app/images/static"
@@ -315,7 +314,6 @@ class SandboxView(BaseModel):
     )
 
     shop_towers_buttons: ShopTowersButtons = ShopTowersButtons()
-    grid: list[list[GridTile]] = grid
 
     playground_hover_area: ActionableElement = ActionableElement(
         rectangle=Rectangle(

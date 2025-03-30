@@ -68,6 +68,31 @@ class GridTile(BaseModel):
 
         self.unit_id = f"{tower_to_place_name}_unit_id"
 
+    def click(self, is_second_display: bool = True):
+        x, y = self.rectangle.center.dict().values()
+        if is_second_display:
+            x = x + 1920
+        pyautogui.click(x, y)
+
+
+class Grid(BaseModel):
+    grid: list[list[GridTile]]
+
+    @computed_field
+    def grid_flatten_list(self) -> list[GridTile]:
+        return sum(self.grid, [])
+
+    def get_all_occupied_tiles(self) -> list[str]:
+        return list(
+            filter(lambda tile: tile.unit_id is not None, self.grid_flatten_list)
+        )
+
+    def get_all_units_id(self) -> list[str]:
+        return [tile.unit_id for tile in self.get_all_occupied_tiles()]
+        return list(
+            filter(lambda tile: tile.unit_id is not None, self.grid_flatten_list)
+        )
+
 
 class ActionableElement(BaseModel):
     rectangle: Rectangle
