@@ -5,6 +5,10 @@ from pathlib import Path
 import pyautogui
 from pydantic import BaseModel
 
+from app.api.routes.arenas_client import (
+    compare_arena_vs_stage_stats,
+    update_arena,
+)
 from app.localstack.images import (
     make_region_screenshot_by_actionable_element,
     ocr_by_path,
@@ -324,12 +328,12 @@ def find_tower_amount_to_hold_until_given_leak_wave(
     return tower_amount - 1
 
 
-def flow_based_on_stats(tower_position: int, tower_amount: int):
+def flow_based_on_stats():
     set_initial_sandbox_view_position()
 
-    place_towers_on_opposite_columns_by_tower_position_and_tower_amount(
-        tower_position=tower_position, tower_amount=tower_amount
-    )
+    place_towers_on_opposite_columns_by_tower_name(tower_name="windhawk")
+    place_towers_on_opposite_columns_by_tower_name(tower_name="windhawk")
+
     set_game_playback_by_playback_value(playback_value=7)
     sandbox_view.start_button.click()
 
@@ -347,6 +351,14 @@ def flow_based_on_stats(tower_position: int, tower_amount: int):
         sandbox_view.pause_button.click()
 
         game_state.update_whole_game_state()
+        units = grid.get_all_units_id()
+        arena = update_arena(units=units, arena_id=1, clear_units=True)
+        compare_result = compare_arena_vs_stage_stats(
+            arena_id=1, stage_id=game_state.next_wave
+        )
+        print(arena)
+        print(compare_result)
+
         import ipdb
 
         ipdb.set_trace()

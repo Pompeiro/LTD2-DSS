@@ -6,7 +6,7 @@ from app.localstack.navigation import (
     navigate_from_main_to_learn_view,
 )
 from app.localstack.sandbox_actions import (
-    place_towers_on_opposite_columns_by_tower_name,
+    flow_based_on_stats,
 )
 
 
@@ -26,7 +26,8 @@ def main():
     # flow_based_on_stats(1, 3)
     # make_screenshot_by_given_display(2, f"app/images/my_screenshot.png")
     # match_template()
-    place_towers_on_opposite_columns_by_tower_name(tower_name="fire_lord")
+    # place_towers_on_opposite_columns_by_tower_name(tower_name="fire_lord")
+    flow_based_on_stats()
 
     import ipdb
 
