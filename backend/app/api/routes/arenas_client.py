@@ -15,8 +15,7 @@ def update_arena(
     units: list[str], arena_id: int = 1, clear_units: bool = True
 ) -> Arena:
     params = {"clear_units": clear_units}
-    json_data = {"units": units}
-    response_json = client.put(url=f"/{arena_id}", params=params, json=json_data).json()
+    response_json = client.put(url=f"/{arena_id}", params=params, json=units).json()
     return Arena(**response_json)
 
 
