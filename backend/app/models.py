@@ -333,6 +333,24 @@ class Unit(SQLModel, table=True):
             ArmorTypes.IMMATERIAL
         )
 
+class StageCounter(SQLModel):
+    id: str
+    hp_vs_stage: float
+    dps_vs_stage: float
+    gold_cost: int
+
+    @computed_field
+    def hp_vs_stage_per_gold(self) -> float:
+        return self.hp_vs_stage / self.gold_cost 
+
+    @computed_field
+    def dps_vs_stage_per_gold(self) -> float:
+        return self.dps_vs_stage / self.gold_cost 
+
+    @computed_field
+    def dps_hp_value(self) -> float:
+        return self.hp_vs_stage_per_gold * self.dps_vs_stage_per_gold 
+
 
 class ElementBaseUnits(SQLModel):
     proton: Unit
@@ -341,6 +359,7 @@ class ElementBaseUnits(SQLModel):
     mudman: Unit
     disciple: Unit
     fire_lord: Unit
+
 
 class Arena(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True, ge=1, le=4)

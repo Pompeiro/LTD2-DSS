@@ -87,7 +87,6 @@ async def find_center(
     return center
 
 
-
 @router.post("/navigate-from-main-to-learn-view", response_model=Message)
 async def navigate_from_main_to_learn_view() -> Message:
     if main_menu_view.expect_to_be_in_view() is True:

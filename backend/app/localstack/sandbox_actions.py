@@ -9,6 +9,7 @@ from app.api.routes.arenas_client import (
     compare_arena_vs_stage_stats,
     update_arena,
 )
+from app.api.routes.units_client import read_element_units
 from app.localstack.images import (
     make_region_screenshot_by_actionable_element,
     ocr_by_path,
@@ -373,8 +374,20 @@ def flow_based_on_stats():
         set_game_playback_by_playback_value(playback_value=7)
 
 
+
 def flow_based_on_next_wave_type():
+    element_units = read_element_units()
+    import ipdb
+    ipdb.set_trace()
+
     set_sandbox_to_initial_state()
+
+    game_state.update_whole_game_state()
+    arena = update_arena(units=[], arena_id=1, clear_units=True)
+    compare_result = compare_arena_vs_stage_stats(
+        arena_id=1, stage_id=game_state.next_wave
+    )
+
     while compare_result.arena_vs_stage_seconds_to_kill_diff >= 7:
         set_game_playback_by_playback_value(playback_value=0.5)
         place_towers_on_opposite_columns_by_tower_name(tower_name="windhawk")
