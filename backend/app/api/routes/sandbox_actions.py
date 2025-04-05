@@ -5,8 +5,6 @@ from fastapi import APIRouter, Response
 from app.localstack.sandbox_actions import (
     check_wave_indicator,
     fill_whole_grid_with_towers,
-    ocr_event_history_log,
-    place_towers_flow,
 )
 
 STATIC_IMAGES_SANDBOX_DIR = Path("app/images/static/sandbox")
@@ -30,6 +28,3 @@ async def check_wave_indicator_() -> bool:
     return check_wave_indicator()
 
 
-@router.get("/ocr-event-history-log")
-async def ocr_event_history_log_() -> list[str]:
-    return ocr_event_history_log()

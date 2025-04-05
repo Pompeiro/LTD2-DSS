@@ -373,6 +373,57 @@ def flow_based_on_stats():
         set_game_playback_by_playback_value(playback_value=7)
 
 
+def flow_based_on_next_wave_type():
+    set_sandbox_to_initial_state()
+    while compare_result.arena_vs_stage_seconds_to_kill_diff >= 7:
+        set_game_playback_by_playback_value(playback_value=0.5)
+        place_towers_on_opposite_columns_by_tower_name(tower_name="windhawk")
+        units = grid.get_all_units_id()
+        arena = update_arena(units=units, arena_id=1, clear_units=True)
+        compare_result = compare_arena_vs_stage_stats(
+            arena_id=1, stage_id=game_state.next_wave
+        )
+        logging.info("placed additional windhawk")
+
+    set_game_playback_by_playback_value(playback_value=7)
+    sandbox_view.start_button.click()
+
+    wave_status = False
+    for _ in range(5):
+        while wave_status is False:
+            wave_status = sandbox_view.expect_wave_phase_indicator_to_be_in_view()
+            logging.info("This is not wave phase")
+
+        while wave_status is True:
+            logging.info("This is still wave phase")
+            wave_status = sandbox_view.expect_wave_phase_indicator_to_be_in_view()
+
+        logging.info("wave phase finished")
+        sandbox_view.pause_button.click()
+
+        game_state.update_whole_game_state()
+        units = grid.get_all_units_id()
+        arena = update_arena(units=units, arena_id=1, clear_units=True)
+        compare_result = compare_arena_vs_stage_stats(
+            arena_id=1, stage_id=game_state.next_wave
+        )
+        print(arena)
+        print(compare_result)
+
+        while compare_result.arena_vs_stage_seconds_to_kill_diff >= 7:
+            set_game_playback_by_playback_value(playback_value=0.5)
+            place_towers_on_opposite_columns_by_tower_name(tower_name="windhawk")
+            units = grid.get_all_units_id()
+            arena = update_arena(units=units, arena_id=1, clear_units=True)
+            compare_result = compare_arena_vs_stage_stats(
+                arena_id=1, stage_id=game_state.next_wave
+            )
+            logging.info("placed additional windhawk")
+
+        sandbox_view.play_button.click()
+        set_game_playback_by_playback_value(playback_value=7)
+
+
 def check_wave_indicator() -> bool:
     return sandbox_view.expect_wave_phase_indicator_to_be_in_view()
 

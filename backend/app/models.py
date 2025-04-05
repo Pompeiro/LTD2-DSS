@@ -273,6 +273,7 @@ class Unit(SQLModel, table=True):
     icon_path: str
     splash_path: str
     version: str
+    upgrades_from: list[str] = Field(sa_column=Column(JSON))
     arena_id: int | None = Field(default=None, foreign_key="arena.id")
     arena: Optional["Arena"] = Relationship(back_populates="units")
 
@@ -332,6 +333,14 @@ class Unit(SQLModel, table=True):
             ArmorTypes.IMMATERIAL
         )
 
+
+class ElementBaseUnits(SQLModel):
+    proton: Unit
+    aqua_spirit: Unit
+    windhawk: Unit
+    mudman: Unit
+    disciple: Unit
+    fire_lord: Unit
 
 class Arena(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True, ge=1, le=4)

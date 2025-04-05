@@ -8,16 +8,17 @@ from fastapi import APIRouter, Query, Response
 from fastapi.exceptions import HTTPException
 from fastapi.responses import FileResponse
 
-from app.models import Message
-from app.views import (
+from app.localstack.images import (
+    make_screenshot_by_given_display,
+    match_template_center,
+)
+from app.localstack.views import (
     choose_legion_view,
     learn_view,
     main_menu_view,
-    make_ss_sync,
-    match_template_center,
     sandbox_view,
-    solo_view,
 )
+from app.models import Message
 
 IMAGES_DIR = "app/images"
 STATIC_IMAGES_DIR = "app/images/static"
@@ -35,7 +36,7 @@ router = APIRouter(prefix="/navigation", tags=["navigation"])
 async def make_ss(
     save_to: Path, display: Annotated[int, Query(ge=1, le=2)] = 2
 ) -> Response:
-    make_ss_sync(save_to=save_to, display=display)
+    make_screenshot_by_given_display(path=save_to, display=display)
     return FileResponse(save_to)
 
 
@@ -76,7 +77,7 @@ async def match_template(return_image: bool) -> Response | list[str]:
 @router.post("/find-center", response_model=None)
 async def find_center(
     return_image: bool,
-    image_to_find_path: Path = sandbox_view.event_history_text.image_path,
+    image_to_find_path: Path = sandbox_view.event_text.image_path,
 ) -> Response | tuple[int, int]:
     center = match_template_center(
         haystack_path=sandbox_view.static_screenshot, needle_path=image_to_find_path
@@ -85,16 +86,6 @@ async def find_center(
         return FileResponse(f"{IMAGES_DIR}/res.png")
     return center
 
-
-@router.post("/navigate-from-main-to-solo-view", response_model=Message)
-async def navigate_from_main_to_solo_view() -> Message:
-    if main_menu_view.expect_to_be_in_view() is True:
-        main_menu_view.navigation_buttons.solo.click()
-        time.sleep(1)
-        if solo_view.expect_to_be_in_view() is True:
-            return Message(message="Navigated to solo view successfuly")
-
-    raise HTTPException(status_code=400, detail="Navigated to solo view failed")
 
 
 @router.post("/navigate-from-main-to-learn-view", response_model=Message)

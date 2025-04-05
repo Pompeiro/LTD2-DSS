@@ -34,6 +34,14 @@ async def read_units(
     units = session.exec(select(Unit).offset(offset).limit(limit)).all()
     return units
 
+@router.get("/element")
+async def read_element_units(
+    session: SessionDep, offset: int = 0, limit: int = Query(default=10, le=500)
+) -> list[Unit]:
+    units = session.query(Unit).filter(Unit.legion_id.startswith("element")).filter(Unit.info_tier != None).all()
+    base_units = filter(lambda unit : unit.upgrades_from ==[], units)
+    return base_units
+
 
 @router.get("/{name}")
 async def read_unit(name: str, session: SessionDep) -> Unit:
@@ -43,3 +51,5 @@ async def read_unit(name: str, session: SessionDep) -> Unit:
             status_code=HTTPStatus.NOT_FOUND, detail=f"Unit with name: {name} not found"
         )
     return unit
+
+
