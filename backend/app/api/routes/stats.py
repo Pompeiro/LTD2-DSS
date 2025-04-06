@@ -55,6 +55,9 @@ async def compare_arena_vs_stage_stats(
     summed_stats = await sum_units_stats(arena_id=arena_id, session=session)
     stage_stats = await calculate_stage_stats(stage=stage, session=session)
 
+    if summed_stats.hp == 0:
+        return ArenaStatsVsStage(arena_hp_vs_stage_attack_type=0.00000001, arena_dps_vs_stage_armor_type=0.000000001, stage_attack_type=stage_stats.attack_type, stage_armor_type=stage_stats.armor_type, stage_hp=stage_stats.hp, stage_dps=stage_stats.dps)
+
     arena_stats_vs_stage_create = ArenaStatsVsStage.model_construct()
     arena_stats_vs_stage_create.arena_hp_vs_stage_attack_type = getattr(
         summed_stats, stage_attack_to_arena_hp_vs_map.get(stage_stats.attack_type)
