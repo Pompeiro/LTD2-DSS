@@ -66,9 +66,7 @@ class GridTile(BaseModel):
         pyautogui.click(x, y)
         pyautogui.click(x, y)
 
-        self.unit_id = tower_to_place_id 
-
-
+        self.unit_id = tower_to_place_id
 
     def click(self, is_second_display: bool = True):
         x, y = self.rectangle.center.dict().values()

@@ -288,7 +288,7 @@ class SandboxView(BaseModel):
         image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("event_text.png"),
     )
     until_wave_text: ActionableElement = ActionableElement(
-        rectangle=Rectangle(tl=Point(x=950, y=104), br=Point(x=1012, y=120)),
+        rectangle=Rectangle(tl=Point(x=950, y=102), br=Point(x=1012, y=122)),
         image_path=STATIC_IMAGES_SANDBOX_DIR.joinpath("until_wave_text.png"),
     )
 

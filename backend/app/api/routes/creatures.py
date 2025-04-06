@@ -5,7 +5,7 @@ from fastapi import APIRouter, Path
 from app.api.deps import SessionDep
 from app.core.config import settings
 from app.enums import creatures_amount_map
-from app.models import CreatureSummedStats, Stats, SummedStats, Unit,StageCounter
+from app.models import CreatureSummedStats, StageCounter, Stats, SummedStats, Unit
 
 router = APIRouter(prefix="/creatures", tags=["creatures"])
 BOSS_WAVES: list[int] = [5, 15, 21]
@@ -65,18 +65,27 @@ async def calculate_stage_stats(
     )
     return creature_stats
 
+
 @router.post("/{stage}/counters")
 async def sort_units_as_counters_by_stage(
-    stage: Annotated[int, Path(ge=1, le=settings.STAGES_LIMIT)], units: list[Unit], session: SessionDep
+    stage: Annotated[int, Path(ge=1, le=settings.STAGES_LIMIT)],
+    units: list[Unit],
+    session: SessionDep,
 ) -> list[StageCounter]:
     creatures = _read_creatures_by_stage(stage=stage, session=session)
     counters = []
     for unit in units:
         unit_dict = unit.model_dump()
-        counters.append(StageCounter(id=unit.id,hp_vs_stage=unit_dict.get(f"hp_vs_{creatures[0].attack_type.lower()}"), dps_vs_stage=unit_dict.get(f"dps_vs_{creatures[0].armor_type.lower()}"), gold_cost=unit.gold_cost))
+        counters.append(
+            StageCounter(
+                id=unit.id,
+                hp_vs_stage=unit_dict.get(f"hp_vs_{creatures[0].attack_type.lower()}"),
+                dps_vs_stage=unit_dict.get(f"dps_vs_{creatures[0].armor_type.lower()}"),
+                gold_cost=unit.gold_cost,
+            )
+        )
 
-    counters_sorted = sorted(counters, key= lambda counter:counter.dps_hp_value, reverse=True)
-    return counters_sorted 
-
-
-
+    counters_sorted = sorted(
+        counters, key=lambda counter: counter.dps_hp_value, reverse=True
+    )
+    return counters_sorted

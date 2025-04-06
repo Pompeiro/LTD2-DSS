@@ -1,7 +1,7 @@
 import httpx
 
-from app.models import CreatureSummedStats, StageCounter, Unit
 from app.api.routes.units_client import read_element_units
+from app.models import CreatureSummedStats, StageCounter, Unit
 
 prefix = "/creatures"
 client = httpx.Client(base_url=f"http://localhost:8000/api/v1{prefix}")
@@ -23,10 +23,7 @@ def calculate_stage_stats(stage: int) -> CreatureSummedStats:
 
 
 def sort_units_as_counters_by_stage(stage: int) -> list[StageCounter]:
-    units=read_element_units()
+    units = read_element_units()
     units_json = [unit.model_dump() for unit in units]
     response_json = client.post(url=f"/{stage}/counters", json=units_json).json()
     return [StageCounter(**unit) for unit in response_json]
-
-
-

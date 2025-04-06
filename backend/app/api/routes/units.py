@@ -40,9 +40,9 @@ async def read_element_units(session: SessionDep) -> list[Unit]:
     units = (
         session.query(Unit)
         .filter(Unit.legion_id.startswith("element"))
-        .filter(Unit.info_tier != None)
+        .filter(Unit.info_tier != None)  # noqa: E711
         .all()
-    )  # noqa: E711
+    )
     base_units = filter(lambda unit: unit.upgrades_from == [], units)
     return base_units
 

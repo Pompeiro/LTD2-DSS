@@ -6,7 +6,7 @@ from app.localstack.navigation import (
     navigate_from_main_to_learn_view,
 )
 from app.localstack.sandbox_actions import (
-    flow_based_on_stats, flow_based_on_next_wave_type
+    flow_based_on_next_wave_type,
 )
 
 
