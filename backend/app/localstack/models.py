@@ -41,16 +41,16 @@ class GridTile(BaseModel):
     rectangle: Rectangle
     unit_id: str | None = None
 
-    def place_tower_by_name(
+    def place_tower_by_id(
         self,
-        tower_to_place_name: str,
+        tower_to_place_id: str,
         current_shop_towers: tuple[str] = (
-            "proton",
-            "aqua_spirit",
-            "windhawk",
-            "mudman",
-            "disciple",
-            "fire_lord",
+            "proton_unit_id",
+            "aqua_spirit_unit_id",
+            "windhawk_unit_id",
+            "mudman_unit_id",
+            "disciple_unit_id",
+            "fire_lord_unit_id",
         ),
         is_second_display: bool = True,
     ) -> None:
@@ -58,7 +58,7 @@ class GridTile(BaseModel):
         current_shop_tower_to_hotkey_map = dict(
             zip(current_shop_towers, hotkeys, strict=False)
         )
-        pyautogui.press(current_shop_tower_to_hotkey_map.get(tower_to_place_name))
+        pyautogui.press(current_shop_tower_to_hotkey_map.get(tower_to_place_id))
 
         x, y = self.rectangle.center.dict().values()
         if is_second_display:
@@ -66,7 +66,7 @@ class GridTile(BaseModel):
         pyautogui.click(x, y)
         pyautogui.click(x, y)
 
-        self.unit_id = f"{tower_to_place_name}_unit_id"
+        self.unit_id = tower_to_place_id
 
     def click(self, is_second_display: bool = True):
         x, y = self.rectangle.center.dict().values()

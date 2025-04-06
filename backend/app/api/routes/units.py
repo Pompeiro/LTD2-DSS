@@ -35,6 +35,18 @@ async def read_units(
     return units
 
 
+@router.get("/element")
+async def read_element_units(session: SessionDep) -> list[Unit]:
+    units = (
+        session.query(Unit)
+        .filter(Unit.legion_id.startswith("element"))
+        .filter(Unit.info_tier != None)  # noqa: E711
+        .all()
+    )
+    base_units = filter(lambda unit: unit.upgrades_from == [], units)
+    return base_units
+
+
 @router.get("/{name}")
 async def read_unit(name: str, session: SessionDep) -> Unit:
     unit = session.query(Unit).filter(Unit.name == name.title()).first()

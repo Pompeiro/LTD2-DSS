@@ -9,6 +9,7 @@ from app.api.routes.arenas_client import (
     compare_arena_vs_stage_stats,
     update_arena,
 )
+from app.api.routes.creatures_client import sort_units_as_counters_by_stage
 from app.localstack.images import (
     make_region_screenshot_by_actionable_element,
     ocr_by_path,
@@ -157,7 +158,7 @@ def place_towers_on_opposite_columns_by_tower_position_and_tower_amount(
                 break
 
 
-def place_towers_on_opposite_columns_by_tower_name(tower_name: str) -> None:
+def place_towers_on_opposite_columns_by_tower_id(tower_id: str) -> None:
     click_to_activate_game_window()
     transposed_grid: Grid = list(zip(*grid.grid, strict=True))
     tower_placed = False
@@ -168,7 +169,7 @@ def place_towers_on_opposite_columns_by_tower_name(tower_name: str) -> None:
             if j % 2 == 0:
                 column = transposed_grid[i][board_row]
             if column.unit_id is None:
-                column.place_tower_by_name(tower_to_place_name=tower_name)
+                column.place_tower_by_id(tower_to_place_id=tower_id)
                 tower_placed = True
             if tower_placed is True:
                 break
@@ -180,6 +181,7 @@ def send_chat_message_by_message(message: str) -> None:
     pyautogui.press("Enter")
     time.sleep(0.05)
     pyautogui.typewrite(message=message)
+    time.sleep(0.25)  # avoid button to still be pressed
     pyautogui.press("Enter")
     return None
 
@@ -331,8 +333,8 @@ def find_tower_amount_to_hold_until_given_leak_wave(
 def flow_based_on_stats():
     set_initial_sandbox_view_position()
 
-    place_towers_on_opposite_columns_by_tower_name(tower_name="windhawk")
-    place_towers_on_opposite_columns_by_tower_name(tower_name="windhawk")
+    place_towers_on_opposite_columns_by_tower_id(tower_id="windhawk_unit_id")
+    place_towers_on_opposite_columns_by_tower_id(tower_id="windhawk_unit_id")
 
     set_game_playback_by_playback_value(playback_value=7)
     sandbox_view.start_button.click()
@@ -361,13 +363,84 @@ def flow_based_on_stats():
 
         while compare_result.arena_vs_stage_seconds_to_kill_diff >= 7:
             set_game_playback_by_playback_value(playback_value=0.5)
-            place_towers_on_opposite_columns_by_tower_name(tower_name="windhawk")
+            place_towers_on_opposite_columns_by_tower_id(tower_id="windhawk_unit_id")
             units = grid.get_all_units_id()
-            arena = update_arena(units=units, arena_id=1, clear_units=True)
+            update_arena(units=units, arena_id=1, clear_units=True)
             compare_result = compare_arena_vs_stage_stats(
                 arena_id=1, stage_id=game_state.next_wave
             )
             logging.info("placed additional windhawk")
+
+        sandbox_view.play_button.click()
+        set_game_playback_by_playback_value(playback_value=7)
+
+
+def _place_counter_tower_for_next_stage_by_next_stage(
+    next_stage: int, arena_vs_stage_seconds_to_kill_diff_threshold: float
+) -> None:
+    counters = sort_units_as_counters_by_stage(stage=next_stage)
+    compare_result = compare_arena_vs_stage_stats(
+        arena_id=1, stage_id=game_state.next_wave
+    )
+    while (
+        compare_result.arena_vs_stage_seconds_to_kill_diff
+        >= arena_vs_stage_seconds_to_kill_diff_threshold
+    ):
+        set_game_playback_by_playback_value(playback_value=0.5)
+        place_towers_on_opposite_columns_by_tower_id(tower_id=counters[0].id)
+        units = grid.get_all_units_id()
+        update_arena(units=units, arena_id=1, clear_units=True)
+        compare_result = compare_arena_vs_stage_stats(
+            arena_id=1, stage_id=game_state.next_wave
+        )
+        logging.info("placed additional %s", counters[0].id)
+
+
+def flow_based_on_next_wave_type():
+    set_sandbox_to_initial_state()
+
+    game_state.update_whole_game_state()
+    update_arena(units=[], arena_id=1, clear_units=True)
+
+    arena_vs_stage_seconds_to_kill_diff_threshold = 7
+    _place_counter_tower_for_next_stage_by_next_stage(
+        next_stage=1,
+        arena_vs_stage_seconds_to_kill_diff_threshold=arena_vs_stage_seconds_to_kill_diff_threshold,
+    )
+    set_game_playback_by_playback_value(playback_value=7)
+    sandbox_view.start_button.click()
+
+    wave_status = False
+    for current_stage in range(1, 10, 1):
+        while wave_status is False:
+            wave_status = sandbox_view.expect_wave_phase_indicator_to_be_in_view()
+            logging.info("This is not wave phase")
+
+        while wave_status is True:
+            logging.info("This is still wave phase")
+            wave_status = sandbox_view.expect_wave_phase_indicator_to_be_in_view()
+
+        logging.info("wave phase finished")
+        sandbox_view.pause_button.click()
+
+        game_state.update_whole_game_state()
+        units = grid.get_all_units_id()
+        logging.info("Current game state next wave %s", game_state.next_wave)
+        logging.info("Current game state next wave by for loop %s", current_stage + 1)
+        if game_state.next_wave - (current_stage + 1):
+            logging.error("Next wave was not recognized properly")
+        update_arena(units=units, arena_id=1, clear_units=True)
+
+        if game_state.next_wave >= 6:
+            arena_vs_stage_seconds_to_kill_diff_threshold = 10 - (
+                game_state.next_wave * 1.5
+            )
+
+        set_game_playback_by_playback_value(playback_value=0.5)
+        _place_counter_tower_for_next_stage_by_next_stage(
+            next_stage=game_state.next_wave,
+            arena_vs_stage_seconds_to_kill_diff_threshold=arena_vs_stage_seconds_to_kill_diff_threshold,
+        )
 
         sandbox_view.play_button.click()
         set_game_playback_by_playback_value(playback_value=7)

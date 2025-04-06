@@ -273,6 +273,7 @@ class Unit(SQLModel, table=True):
     icon_path: str
     splash_path: str
     version: str
+    upgrades_from: list[str] = Field(sa_column=Column(JSON))
     arena_id: int | None = Field(default=None, foreign_key="arena.id")
     arena: Optional["Arena"] = Relationship(back_populates="units")
 
@@ -331,6 +332,34 @@ class Unit(SQLModel, table=True):
         return self.dps * damage_def_map.get(self.attack_type).get(
             ArmorTypes.IMMATERIAL
         )
+
+
+class StageCounter(SQLModel):
+    id: str
+    hp_vs_stage: float
+    dps_vs_stage: float
+    gold_cost: int
+
+    @computed_field
+    def hp_vs_stage_per_gold(self) -> float:
+        return self.hp_vs_stage / self.gold_cost
+
+    @computed_field
+    def dps_vs_stage_per_gold(self) -> float:
+        return self.dps_vs_stage / self.gold_cost
+
+    @computed_field
+    def dps_hp_value(self) -> float:
+        return self.hp_vs_stage_per_gold * self.dps_vs_stage_per_gold
+
+
+class ElementBaseUnits(SQLModel):
+    proton: Unit
+    aqua_spirit: Unit
+    windhawk: Unit
+    mudman: Unit
+    disciple: Unit
+    fire_lord: Unit
 
 
 class Arena(SQLModel, table=True):

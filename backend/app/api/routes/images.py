@@ -12,9 +12,9 @@ from fastapi.responses import FileResponse
 from app.api.deps import SessionDep
 from app.core.config import settings
 from app.enums import ArenaGrid, ShopGrid
+from app.localstack.views import sandbox_view
 from app.models import Unit
 from app.playground_area_coordinates import grid
-from app.views import sandbox_view
 
 IMAGES_DIR = "app/images"
 STATIC_IMAGES_SANDBOX_DIR = Path("app/images/static/sandbox")
