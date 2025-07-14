@@ -14,20 +14,20 @@ import {
   ModalHeader,
   ModalOverlay,
 } from "@chakra-ui/react"
-import { type SubmitHandler, useForm } from "react-hook-form"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { type SubmitHandler, useForm } from "react-hook-form"
 
 import {
   type ApiError,
-  type UserOut,
+  type UserPublic,
   type UserUpdate,
   UsersService,
 } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
-import { emailPattern } from "../../utils"
+import { emailPattern, handleError } from "../../utils"
 
 interface EditUserProps {
-  user: UserOut
+  user: UserPublic
   isOpen: boolean
   onClose: () => void
 }
@@ -60,8 +60,7 @@ const EditUser = ({ user, isOpen, onClose }: EditUserProps) => {
       onClose()
     },
     onError: (err: ApiError) => {
-      const errDetail = (err.body as any)?.detail
-      showToast("Something went wrong.", `${errDetail}`, "error")
+      handleError(err, showToast)
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] })
